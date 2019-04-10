@@ -11,10 +11,15 @@
             var t0 = performance.now();
 
             // Defuse the toString() trick
-            // The best way would be to check if the argument has an id and if so
-            // reset the getter, but it's easier to just pretend the devconsole is
-            // always open
+            if (typeof argument === 'object' && argument !== null) {
+                var idProperties = Object.getOwnPropertyDescriptor(argument, 'id')
+                // I'm not sure if this is a good idea, but whatever
+                if (idProperties !== undefined && 'get' in idProperties && typeof idProperties['get'] === 'function') {
+                    return
+                }
+            }
 
+            // Just in case there's some other clever tricks, do this every time
             var dummy = argument.id + ""
             originalFunction(argument)
 
