@@ -1,0 +1,19 @@
+{
+   "author": "martin",
+   "content_scripts": [ {
+      "all_frames": true,
+      "js": [ "script.js" ],
+      "matches": [ "*://*/*" ],
+      "run_at": "document_start"
+   } ],
+   "description": "Defuses the dumbest attempts at detecting devtools",
+   "icons": {
+      "128": "icon128.png",
+      "32": "icon32.png"
+   },
+   "manifest_version": 1,
+   "name": "anti anti devtools",
+   "short_name": "AAD",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "2.3"
+}
