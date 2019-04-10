@@ -1,10 +1,25 @@
 (function() {
     var toInject = `
+       // Hurr durr javascript
     (function() {
-        // Hurr durr javascript
+        var orig_debug = console.debug
+        var orig_info = console.info
+        var orig_log = console.log
+        var orig_warn = console.warn
+        var orig_dir = console.warn
+
         function sleep (dur){
             var t0 = performance.now();
             while(performance.now() < t0 + dur){ /* do nothing */ }
+        }
+
+        function checkForProperty(argument, property) {
+            var idProperties = Object.getOwnPropertyDescriptor(argument, property)
+            // I'm not sure if this is a good idea, but whatever
+            if (idProperties !== undefined && 'get' in idProperties && typeof idProperties['get'] === 'function') {
+                return true
+            }
+            return false
         }
 
         function saferPrint(argument, originalFunction) {
@@ -12,16 +27,22 @@
 
             // Defuse the toString() trick
             if (typeof argument === 'object' && argument !== null) {
-                var idProperties = Object.getOwnPropertyDescriptor(argument, 'id')
-                // I'm not sure if this is a good idea, but whatever
-                if (idProperties !== undefined && 'get' in idProperties && typeof idProperties['get'] === 'function') {
+                if (checkForProperty(argument, 'id') || checkForProperty(argument, 'nodeType')) {
                     return
                 }
             }
 
             // Just in case there's some other clever tricks, do this every time
-            var dummy = argument.id + ""
-            originalFunction(argument)
+            try {
+                if (typeof argument === 'object' && argument !== null) {
+                    var props = Object.getOwnPropertyNames(argument)
+                    for (var i=0; i<props.length; i++) {
+                        var dummy = argument[props[i]]
+                    }
+                }
+
+                originalFunction(argument)
+            } catch(e) {}
 
             // Defuse timing attacks
             // By default it will sleep about 1ms, but it adjusts to the time it
@@ -34,15 +55,11 @@
 
         var sleepDuration = 1
 
-        var orig_debug = console.debug
-        var orig_info = console.info
-        var orig_log = console.log
-        var orig_warn = console.warn
-
         console.debug = function(argument) { saferPrint(argument, orig_debug) }
         console.info = function(argument) { saferPrint(argument, orig_info) }
         console.log = function(argument) { saferPrint(argument, orig_log) }
         console.warn = function(argument) { saferPrint(argument, orig_warn) }
+        console.dir = function(argument) { saferPrint(argument, orig_dir) }
 
         console.clear = function() { }
 
@@ -52,6 +69,7 @@
         window.console.log = console.log
         window.console.warn = console.warn
         window.console.clear = console.clear
+        window.console.dir = console.dir
 
         // Just never let people see the actual outer size
         Object.defineProperty(window, "outerWidth", {get: () => {
