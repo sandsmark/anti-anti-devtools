@@ -96,28 +96,28 @@
         Date.prototype.getTimezoneOffset = function() { return 0; }
 
         Object.defineProperty(window.screen, "availWidth", {get: () => {
-            return window.innerWidth
+            return window.innerWidth + Math.random()
         }});
 
         Object.defineProperty(window.screen, "width", {get: () => {
-            return window.innerWidth
+            return window.innerWidth + Math.random()
         }});
 
         Object.defineProperty(window.screen, "availHeight", {get: () => {
-            return window.innerHeight
+            return window.innerHeight + Math.random()
         }});
 
         Object.defineProperty(window.screen, "height", {get: () => {
-            return window.innerHeight
+            return window.innerHeight + Math.random()
         }});
 
         // Just never let people see the actual outer size
         Object.defineProperty(window, "outerWidth", {get: () => {
-            return window.innerWidth
+            return window.innerWidth + Math.random()
         }});
 
         Object.defineProperty(window, "outerHeight", {get: () => {
-            return window.innerHeight
+            return window.innerHeight + Math.random()
         }});
         console.log("devtools detect stuff overriden")
     } + ')();' ;
