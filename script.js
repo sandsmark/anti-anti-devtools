@@ -125,4 +125,7 @@
     element.textContent = toInject
     element.async = false
     document.documentElement.insertBefore(element, document.documentElement.firstElement)
+    if (element.parentNode) {
+        element.parentNode.removeChild(element);
+    }
 })();
