@@ -1,7 +1,7 @@
 (function() {
-    var toInject = `
+    var toInject = 
        // Hurr durr javascript
-    (function() {
+    '(' + function() {
         var orig_debug = console.debug
         var orig_info = console.info
         var orig_log = console.log
@@ -30,6 +30,8 @@
                 if (checkForProperty(argument, 'id') || checkForProperty(argument, 'nodeType')) {
                     return
                 }
+            } else if (typeof argument === 'string') {
+                argument = argument.trim()
             }
 
             // Just in case there's some other clever tricks, do this every time
@@ -70,6 +72,44 @@
         window.console.warn = console.warn
         window.console.clear = console.clear
         window.console.dir = console.dir
+        
+        navigator.getBattery = function() { return undefined; }
+        window.AudioContext = undefined
+        window.OfflineAudioContext = undefined
+        window.devicePixelRatio = 1
+        window.screen = {}
+        window.screen.colorDepth = 24
+
+        navigator.doNotTrack = undefined
+        Object.defineProperty(navigator, 'sendBeacon', { get: () => function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; } })
+        Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 1 })
+        Object.defineProperty(navigator, 'connection', { get: () => undefined })
+        Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36' })
+        Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] })
+        Object.defineProperty(navigator, 'platform', { get: () => 'Win64' })
+        Object.defineProperty(document, 'referrer', { get: () => window.location })
+        Object.defineProperty(navigator, 'appVersion', { get: () =>  '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36' })
+        //Object.freeze(navigator)
+        //navigator.languages = ['en-US']
+
+        Object.defineProperty(Date.prototype, "getTimezoneOffset", {get: () => function() { return 0; } })
+        Date.prototype.getTimezoneOffset = function() { return 0; }
+
+        Object.defineProperty(window.screen, "availWidth", {get: () => {
+            return window.innerWidth
+        }});
+
+        Object.defineProperty(window.screen, "width", {get: () => {
+            return window.innerWidth
+        }});
+
+        Object.defineProperty(window.screen, "availHeight", {get: () => {
+            return window.innerHeight
+        }});
+
+        Object.defineProperty(window.screen, "height", {get: () => {
+            return window.innerHeight
+        }});
 
         // Just never let people see the actual outer size
         Object.defineProperty(window, "outerWidth", {get: () => {
@@ -80,7 +120,7 @@
             return window.innerHeight
         }});
         console.log("devtools detect stuff overriden")
-    })();`
+    } + ')();' ;
     var element = document.createElement('script');
     element.textContent = toInject
     element.async = false
