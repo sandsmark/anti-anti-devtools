@@ -1,5 +1,13 @@
 {
    "author": "martin",
+   "background": {
+       "scripts": ["useragent.js"]
+   },
+   "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
    "content_scripts": [ {
       "all_frames": true,
       "js": [ "script.js" ],
