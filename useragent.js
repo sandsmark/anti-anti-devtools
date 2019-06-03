@@ -9,6 +9,8 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
             headers[i].value = userAgent;
         } else if( headers[i].name == 'Accept-Language' ) {
             headers[i].value = 'en-US,en;q=0.8';
+        } else if( headers[i].name == 'Accept' && details.url.indexOf("yahoo.com/") != -1 ) {
+            headers[i].value = 'accept: application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3';
         }
     }
     return {requestHeaders: headers};
