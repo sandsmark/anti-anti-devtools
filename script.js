@@ -84,11 +84,11 @@
         Object.defineProperty(navigator, 'sendBeacon', { get: () => function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; } })
         Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 1 })
         Object.defineProperty(navigator, 'connection', { get: () => undefined })
-        Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36' })
+        Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.38 Safari/537.36' })
         Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] })
         Object.defineProperty(navigator, 'platform', { get: () => 'Win64' })
         Object.defineProperty(document, 'referrer', { get: () => window.location })
-        Object.defineProperty(navigator, 'appVersion', { get: () =>  '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36' })
+        Object.defineProperty(navigator, 'appVersion', { get: () =>  '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36' })
         //Object.freeze(navigator)
         //navigator.languages = ['en-US']
 
