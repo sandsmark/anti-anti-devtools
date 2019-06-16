@@ -137,6 +137,68 @@
         delete window.WebGLUniformLocation
         delete window.WebGLVertexArrayObject
 
+
+        // Since noone seem to get canvas fingerprinting avoidance right
+        // We need to get consistent noise for each instance
+        const shift = {
+            'r': Math.floor(Math.random() * 10) - 5,
+            'g': Math.floor(Math.random() * 10) - 5,
+            'b': Math.floor(Math.random() * 10) - 5,
+            'a': Math.floor(Math.random() * 10) - 5
+        };
+
+        // to make sure the js never sees that we fuck with it,
+        // we restore the contents after generating whatever it wants
+        var canvasContentBackup
+
+        function garbleCanvas(canvas) {
+            const {width, height} = canvas
+            const context = canvas.getContext('2d')
+            const image = context.getImageData(0, 0, canvas.width, canvas.height)
+
+            // not sure if we need to do this, or if we can reuse the image,
+            // but javascript is slow crap anyways so fuck performance
+            canvasContentBackup = context.getImageData(0, 0, canvas.width, canvas.height)
+
+            for (let row = 0; row < height; row += 3) {
+                for (let col = 0; col < width; col += 3) {
+                    const index = ((row * (width * 4)) + (col * 4));
+                    image.data[index + 0] = image.data[index + 0] + shift.r;
+                    image.data[index + 1] = image.data[index + 1] + shift.g;
+                    image.data[index + 2] = image.data[index + 2] + shift.b;
+                    image.data[index + 3] = image.data[index + 3] + shift.a;
+                }
+            }
+
+            context.putImageData(image, 0, 0);
+        }
+
+        function ungarbleCanvas(canvas) {
+            const context = canvas.getContext('2d');
+            context.putImageData(canvasContentBackup, 0, 0);
+            canvasContentBackup = undefined
+        }
+
+        const orig_toBlob = HTMLCanvasElement.prototype.toBlob;
+        Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+            value: function() {
+                garbleCanvas(this)
+                const ret = orig_toBlob.apply(this, arguments)
+                ungarbleCanvas(this)
+                return ret
+            }
+        });
+
+        const orig_toDataURL = HTMLCanvasElement.prototype.toDataURL;
+        Object.defineProperty(HTMLCanvasElement.prototype, 'toDataURL', {
+            value: function() {
+                garbleCanvas(this)
+                const ret = orig_toDataURL.apply(this, arguments);
+                ungarbleCanvas(this)
+                return ret
+            }
+        });
+
         console.log("devtools detect stuff overriden")
     } + ')();' ;
     var element = document.createElement('script');
