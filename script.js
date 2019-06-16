@@ -119,6 +119,26 @@
         Object.defineProperty(window, "outerHeight", {get: () => {
             return window.innerHeight + Math.random()
         }});
+
+        // fucking webgl is hard to get rid of
+        delete window.WebGL2RenderingContext
+        delete window.WebGLActiveInfo
+        delete window.WebGLBuffer
+        delete window.WebGLContextEvent
+        delete window.WebGLFramebuffer
+        delete window.WebGLProgram
+        delete window.WebGLQuery
+        delete window.WebGLRenderbuffer
+        delete window.WebGLRenderingContext
+        delete window.WebGLSampler
+        delete window.WebGLShader
+        delete window.WebGLShaderPrecisionFormat
+        delete window.WebGLSync
+        delete window.WebGLTexture
+        delete window.WebGLTransformFeedback
+        delete window.WebGLUniformLocation
+        delete window.WebGLVertexArrayObject
+
         console.log("devtools detect stuff overriden")
     } + ')();' ;
     var element = document.createElement('script');
