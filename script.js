@@ -87,10 +87,8 @@
         Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.38 Safari/537.36' })
         Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] })
         Object.defineProperty(navigator, 'platform', { get: () => 'Win64' })
-        Object.defineProperty(document, 'referrer', { get: () => window.location })
+        Object.defineProperty(document, 'referrer', { get: () => 'fuckyou' })
         Object.defineProperty(navigator, 'appVersion', { get: () =>  '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36' })
-        //Object.freeze(navigator)
-        //navigator.languages = ['en-US']
 
         Object.defineProperty(Date.prototype, "getTimezoneOffset", {get: () => function() { return 0; } })
         Date.prototype.getTimezoneOffset = function() { return 0; }
