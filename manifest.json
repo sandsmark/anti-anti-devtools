@@ -1,7 +1,7 @@
 {
    "author": "martin",
    "background": {
-       "scripts": ["useragent.js"]
+       "scripts": ["headers.js"]
    },
    "permissions": [
     "webRequest",
