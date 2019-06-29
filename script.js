@@ -161,8 +161,18 @@
         /////////////////////
         // Checking outerWidth is what people do to check if the devtools pane is open, so fuck that up
         // And while we're at it, fuck up fingerprinting that rely on the window size (some crash with this)
-        function fakeWidth() { return window.innerWidth + hourlyRandom(); }
-        function fakeHeight() { return window.innerHeight + hourlyRandom(); }
+        const orig_innerWidth = Object.getOwnPropertyDescriptor(window, 'innerWidth')['get']
+        const orig_innerHeight = Object.getOwnPropertyDescriptor(window, 'innerHeight')['get']
+
+        const innerWidthRandomness = hourlyRandom()
+        const innerHeightRandomness = hourlyRandom()
+        setGet(window, "innerWidth", function () { return orig_innerWidth() + innerWidthRandomness; });
+        setGet(window, "innerHeight", function () { return orig_innerHeight() + innerHeightRandomness; });
+
+        const widthRandomness = hourlyRandom()
+        const heightRandomness = hourlyRandom()
+        function fakeWidth() { return window.innerWidth + widthRandomness; }
+        function fakeHeight() { return window.innerHeight + heightRandomness; }
 
         setGet(window.screen, "availWidth", fakeWidth);
         setGet(window.screen, "width", fakeWidth);
