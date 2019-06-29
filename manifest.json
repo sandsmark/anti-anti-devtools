@@ -12,6 +12,7 @@
       "all_frames": true,
       "js": [ "script.js" ],
       "matches": [ "*://*/*" ],
+      "match_about_blank": true,
       "run_at": "document_start"
    } ],
    "description": "Defuses the dumbest attempts at detecting devtools",
