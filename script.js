@@ -182,26 +182,6 @@
         setGet(window.screen, "height", fakeHeight);
         setGet(window, "outerHeight", fakeHeight);
 
-        /////////////////////
-        // fucking webgl is hard to get rid of
-        delete window.WebGL2RenderingContext
-        delete window.WebGLActiveInfo
-        delete window.WebGLBuffer
-        delete window.WebGLContextEvent
-        delete window.WebGLFramebuffer
-        delete window.WebGLProgram
-        delete window.WebGLQuery
-        delete window.WebGLRenderbuffer
-        delete window.WebGLRenderingContext
-        delete window.WebGLSampler
-        delete window.WebGLShader
-        delete window.WebGLShaderPrecisionFormat
-        delete window.WebGLSync
-        delete window.WebGLTexture
-        delete window.WebGLTransformFeedback
-        delete window.WebGLUniformLocation
-        delete window.WebGLVertexArrayObject
-
 
         /////////////////////
         // Since noone seem to get canvas fingerprinting avoidance right, do it ourselves
@@ -281,6 +261,147 @@
                 return ret
             }
         });
+
+
+        /////////////////////
+        // fucking webgl is hard to get rid of
+        delete window.WebGLActiveInfo
+        delete window.WebGLBuffer
+        delete window.WebGLContextEvent
+        delete window.WebGLFramebuffer
+        delete window.WebGLProgram
+        delete window.WebGLQuery
+        delete window.WebGLRenderbuffer
+        delete window.WebGLSampler
+        delete window.WebGLShader
+        delete window.WebGLShaderPrecisionFormat
+        delete window.WebGLSync
+        delete window.WebGLTexture
+        delete window.WebGLTransformFeedback
+        delete window.WebGLUniformLocation
+        delete window.WebGLVertexArrayObject
+
+        const glVendors = [
+            'Microsoft',
+            'NVIDIA Corporation',
+            'Intel Open Source Technology Center',
+            'Google Inc.',
+            'Intel Inc.',
+            'Brian Paul',
+            'Apple Inc.',
+            'ATI Technologies Inc.'
+
+        ]
+
+        // Some others I haven't bothered find out where belongs
+        // Gallium 0.4 on NVE7
+        // Intel(R) HD Graphics
+        // ATI Radeon HD Verde XT Prototype OpenGL Engine
+        const glRenderers = {
+            'Microsoft': ['Microsoft Basic Render Driver'],
+            'Brian Paul': ['Brian Paul'],
+            'NVIDIA Corporation': [
+                'NVIDIA GeForce GT 650M OpenGL Engine',
+                'NVIDIA GeForce GTX 775M OpenGL Engine',
+                'NVIDIA GeForce GT 625 (OEM)'
+            ],
+            'Apple Inc.': [
+                'Apple A9 GPU',
+                'PowerVR SGX 535',
+                'PowerVR SGX 543'
+            ],
+            'Intel Inc.': [
+                'Intel Iris Pro OpenGL Engine'
+            ],
+            'Intel Open Source Technology Center': [
+                'Mesa DRI Intel(R) HD Graphics 630 (Kaby Lake GT2)',
+                'Mesa DRI Intel(R) Iris 6100 (Broadwell GT3)',
+                'Mesa DRI Intel(R) HD Graphics 520 (Skylake GT2)',
+                'Mesa DRI Intel(R) HD Graphics 615 (Kaby Lake GT2)',
+                'Mesa DRI Intel(R) Iris 6100 (Broadwell GT3)'
+            ],
+            'Google Inc.': [
+                'ANGLE (Intel(R) HD Graphics 4600 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (NVIDIA GeForce GTX 1050 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (NVIDIA GeForce GTX 770 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics Family Direct3D9Ex vs_3_0 ps_3_0)',
+                'ANGLE (NVIDIA GeForce GTX 950 Direct3D9Ex vs_3_0 ps_3_0)',
+                'ANGLE (Intel(R) HD Graphics 4600 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics Family Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics 4600 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (NVIDIA GeForce GTX 960 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics Family Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics 5300 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics 4000 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (ATI Radeon HD 3450 Direct3D9Ex vs_3_0 ps_3_0)',
+                'ANGLE (Intel(R) HD Graphics 4000 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics 4600 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics 3000 Direct3D11 vs_4_1 ps_4_1)',
+                'ANGLE (Intel(R) HD Graphics 4000 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (NVIDIA GeForce GT 750M Direct3D11 vs_5_0 ps_5_0',
+                'ANGLE (Intel(R) HD Graphics P4600/P4700 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) G45/G43 Express Chipset (Microsoft Corporation - WDDM 1.1) Direct3D9Ex vs_3_0 ps_3_0)',
+                'ANGLE (Intel(R) HD Graphics Family Direct3D9Ex vs_3_0 ps_3_0)',
+                'ANGLE (Intel(R) HD Graphics 520 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics 5500 Direct3D11 vs_5_0 ps_5_0)',
+                'ANGLE (Intel(R) HD Graphics 530 Direct3D11 vs_5_0 ps_5_0)',
+                'Google SwiftShader'
+            ],
+            'ATI Technologies Inc.': [
+                'AMD Radeon Pro 460 OpenGL Engine',
+                'AMD Radeon R9 M370X OpenGL Engine',
+            ]
+        }
+
+        const glVendor = glVendors[Math.floor(hourlyRandom() * glVendors.length)]
+        const glRenderer = glRenderers[glVendor][Math.floor(hourlyRandom() * glRenderers[glVendor].length)]
+
+        const orig_gl2GetGetExtension = WebGL2RenderingContext.prototype.getExtension;
+        const orig_gl2GetParameter = WebGL2RenderingContext.prototype.getParameter;
+        Object.defineProperty(WebGL2RenderingContext.prototype, 'getParameter', {
+            value: function(name) {
+                const debugInfo = orig_gl2GetGetExtension.call(this, 'WEBGL_debug_renderer_info');
+                if (name == debugInfo.UNMASKED_VENDOR_WEBGL) {
+                    return glVendor
+                }
+                if (name == debugInfo.UNMASKED_VENDOR_WEBGL) {
+                    return glRenderer
+                }
+                return orig_gl2GetParameter.apply(this, arguments);
+            }
+        });
+
+        //Object.defineProperty(WebGL2RenderingContext.prototype, 'getExtension', {
+        //    value: function(prop) {
+        //        console.log(prop)
+        //        return orig_gl2GetGetExtension.apply(this, arguments);
+        //    }
+        //});
+
+
+        const orig_glGetGetExtension = WebGLRenderingContext.prototype.getExtension;
+        const orig_glGetParameter = WebGLRenderingContext.prototype.getParameter;
+        Object.defineProperty(WebGLRenderingContext.prototype, 'getParameter', {
+            value: function(name) {
+                console.log("getparam " + name)
+                const debugInfo = orig_glGetGetExtension.call(this, 'WEBGL_debug_renderer_info');
+                if (name == debugInfo.UNMASKED_VENDOR_WEBGL) {
+                    return glVendor
+                    //return 'Google Inc.';
+                }
+                if (name == debugInfo.UNMASKED_RENDERER_WEBGL) {
+                    return glRenderer
+                }
+                return orig_glGetParameter.apply(this, arguments);
+            }
+        });
+
+        //Object.defineProperty(WebGLRenderingContext.prototype, 'getExtension', {
+        //    value: function(name) {
+        //        console.log("getExtension, " + name)
+        //        return orig_glGetGetExtension.apply(this, arguments);
+        //    }
+        //});
 
         console.log("devtools detect stuff overriden")
     } + ')();' ;
