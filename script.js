@@ -364,7 +364,7 @@
                 if (name == debugInfo.UNMASKED_VENDOR_WEBGL) {
                     return glVendor
                 }
-                if (name == debugInfo.UNMASKED_VENDOR_WEBGL) {
+                if (name == debugInfo.UNMASKED_RENDERER_WEBGL) {
                     return glRenderer
                 }
                 return orig_gl2GetParameter.apply(this, arguments);
@@ -383,11 +383,9 @@
         const orig_glGetParameter = WebGLRenderingContext.prototype.getParameter;
         Object.defineProperty(WebGLRenderingContext.prototype, 'getParameter', {
             value: function(name) {
-                console.log("getparam " + name)
                 const debugInfo = orig_glGetGetExtension.call(this, 'WEBGL_debug_renderer_info');
                 if (name == debugInfo.UNMASKED_VENDOR_WEBGL) {
                     return glVendor
-                    //return 'Google Inc.';
                 }
                 if (name == debugInfo.UNMASKED_RENDERER_WEBGL) {
                     return glRenderer
