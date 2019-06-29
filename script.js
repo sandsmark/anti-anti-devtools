@@ -2,17 +2,42 @@
     var toInject = 
        // Hurr durr javascript
     '(' + function() {
+
+        /////////////////////
+        // For generating consistent randomness
+        // We get consistent randomness in a time window of ten minutes
+        //
+
+        function simpleHash(str) {
+            var h = 0
+            for (var i = 0; i < str.length; i++) {
+                h = Math.imul(31, h) + str.charCodeAt(i);
+                h %= 4294967295
+            }
+            return h
+        }
+
+        var LCG=s=>()=>(2**31-1&(s=Math.imul(48271,s)))/2**31;
+        const date = new Date()
+
+        // Decided against using the window.location because some inject code
+        // to run in about:blank (or another host and get the value back),
+        // which would make this moot
+        const hourlySeed = simpleHash(/*window.location.hostname + */ date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString())
+        var hourlyRandom = LCG(hourlySeed)
+
+
+        /////////////////////
+        // Avoid detection of devtools being open
+        //
+
         var orig_debug = console.debug
         var orig_info = console.info
         var orig_log = console.log
         var orig_warn = console.warn
         var orig_dir = console.warn
 
-        function sleep (dur){
-            var t0 = performance.now();
-            while(performance.now() < t0 + dur){ /* do nothing */ }
-        }
-
+        // Devtools tries to do introspection, so defuse these
         function checkForProperty(argument, property) {
             var idProperties = Object.getOwnPropertyDescriptor(argument, property)
             // I'm not sure if this is a good idea, but whatever
@@ -22,6 +47,11 @@
             return false
         }
 
+        // Avoid timing attacks on the console.* functions
+        function sleep (dur){
+            var t0 = performance.now();
+            while(performance.now() < t0 + dur){ /* do nothing */ }
+        }
         var sleepDuration = 1
 
         function saferPrint(argument, originalFunction) {
@@ -63,6 +93,7 @@
         console.warn = function(argument) { saferPrint(argument, orig_warn) }
         console.dir = function(argument) { saferPrint(argument, orig_dir) }
 
+        // We don't want them to hide stuff from us
         console.clear = function() { }
 
         // Just in case
@@ -72,17 +103,25 @@
         window.console.warn = console.warn
         window.console.clear = console.clear
         window.console.dir = console.dir
-        
+
+
+        /////////////////////
+        // Defuse a bunch of dumb APIs
         navigator.getBattery = function() { return undefined; }
-        window.AudioContext = undefined
-        window.OfflineAudioContext = undefined
         window.devicePixelRatio = 1
         window.screen = {}
         window.screen.colorDepth = 24
-
         navigator.doNotTrack = undefined
 
 
+        /////////////////////
+        // Audio stuff is used for fingerprinting, just disable the whole thing
+        window.OfflineAudioContext = undefined
+        window.AudioContext = undefined
+
+
+        /////////////////////
+        // Anonymize a bunch of properties
         function setGet(obj, propertyName, func) {
             try {
                 Object.defineProperty(obj, propertyName, { get: func })
@@ -99,13 +138,14 @@
             }
         }
 
+        /////////////////////
         // Beacons are dumb
         setGet(navigator, 'sendBeacon', function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; })
+
 
         function setProp(obj, propertyName, val) {
             setGet(obj, propertyName, () => val)
         }
-
 
         setProp(navigator, 'hardwareConcurrency', 1)
         setProp(navigator, 'connection', undefined)
@@ -117,10 +157,12 @@
 
         Date.prototype.getTimezoneOffset = function() { return 0; }
 
+
+        /////////////////////
         // Checking outerWidth is what people do to check if the devtools pane is open, so fuck that up
-        // And while we're at it, fuck up fingerprinting that rely on the window size
-        function fakeWidth() { return window.innerWidth + Math.random(); }
-        function fakeHeight() { return window.innerHeight + Math.random(); }
+        // And while we're at it, fuck up fingerprinting that rely on the window size (some crash with this)
+        function fakeWidth() { return window.innerWidth + hourlyRandom(); }
+        function fakeHeight() { return window.innerHeight + hourlyRandom(); }
 
         setGet(window.screen, "availWidth", fakeWidth);
         setGet(window.screen, "width", fakeWidth);
@@ -130,6 +172,7 @@
         setGet(window.screen, "height", fakeHeight);
         setGet(window, "outerHeight", fakeHeight);
 
+        /////////////////////
         // fucking webgl is hard to get rid of
         delete window.WebGL2RenderingContext
         delete window.WebGLActiveInfo
@@ -150,15 +193,16 @@
         delete window.WebGLVertexArrayObject
 
 
-        // Since noone seem to get canvas fingerprinting avoidance right
+        /////////////////////
+        // Since noone seem to get canvas fingerprinting avoidance right, do it ourselves
         // We need to get consistent noise for each instance,
         // which is one way fingerprinting code detects other anti-canvas
         // fingerprinting extensions
         const shift = {
-            'r': Math.floor(Math.random() * 10) - 5,
-            'g': Math.floor(Math.random() * 10) - 5,
-            'b': Math.floor(Math.random() * 10) - 5,
-            'a': Math.floor(Math.random() * 10) - 5
+            'r': Math.floor(hourlyRandom() * 10) - 5,
+            'g': Math.floor(hourlyRandom() * 10) - 5,
+            'b': Math.floor(hourlyRandom() * 10) - 5,
+            'a': Math.floor(hourlyRandom() * 10) - 5
         };
 
         function garbleImage(image, width, height) {
