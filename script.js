@@ -22,6 +22,8 @@
             return false
         }
 
+        var sleepDuration = 1
+
         function saferPrint(argument, originalFunction) {
             var t0 = performance.now();
 
@@ -55,8 +57,6 @@
             sleep(sleepDuration - duration)
         }
 
-        var sleepDuration = 1
-
         console.debug = function(argument) { saferPrint(argument, orig_debug) }
         console.info = function(argument) { saferPrint(argument, orig_info) }
         console.log = function(argument) { saferPrint(argument, orig_log) }
@@ -81,42 +81,56 @@
         window.screen.colorDepth = 24
 
         navigator.doNotTrack = undefined
-        Object.defineProperty(navigator, 'sendBeacon', { get: () => function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; } })
-        Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 1 })
-        Object.defineProperty(navigator, 'connection', { get: () => undefined })
-        Object.defineProperty(navigator, 'userAgent', { get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.38 Safari/537.36' })
-        Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] })
-        Object.defineProperty(navigator, 'platform', { get: () => 'Win64' })
-        Object.defineProperty(document, 'referrer', { get: () => 'fuckyou' })
-        Object.defineProperty(navigator, 'appVersion', { get: () =>  '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36' })
 
-        Object.defineProperty(Date.prototype, "getTimezoneOffset", {get: () => function() { return 0; } })
+
+        function setGet(obj, propertyName, func) {
+            try {
+                Object.defineProperty(obj, propertyName, { get: func })
+            } catch (exception) {
+                console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception)
+            }
+        }
+
+        function setVal(obj, propertyName, func) {
+            try {
+                Object.defineProperty(obj, propertyName, { value: func })
+            } catch (exception) {
+                console.log("Failed to override value: " + exception)
+            }
+        }
+
+        // Beacons are dumb
+        setGet(navigator, 'sendBeacon', function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; })
+
+        function setProp(obj, propertyName, val) {
+            setGet(obj, propertyName, () => val)
+        }
+
+
+        setProp(navigator, 'hardwareConcurrency', 1)
+        setProp(navigator, 'connection', undefined)
+        setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.38 Safari/537.36')
+        setProp(navigator, 'languages', ['en-US', 'en'])
+        setProp(navigator, 'platform', 'Win64')
+        setProp(document, 'referrer', 'fuckyou')
+        setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36')
+
+        setProp(Date.prototype, "getTimezoneOffset", 0)
+
         Date.prototype.getTimezoneOffset = function() { return 0; }
 
-        Object.defineProperty(window.screen, "availWidth", {get: () => {
-            return window.innerWidth + Math.random()
-        }});
+        // Checking outerWidth is what people do to check if the devtools pane is open, so fuck that up
+        // And while we're at it, fuck up fingerprinting that rely on the window size
+        function fakeWidth() { return window.innerWidth + Math.random(); }
+        function fakeHeight() { return window.innerHeight + Math.random(); }
 
-        Object.defineProperty(window.screen, "width", {get: () => {
-            return window.innerWidth + Math.random()
-        }});
+        setGet(window.screen, "availWidth", fakeWidth);
+        setGet(window.screen, "width", fakeWidth);
+        setGet(window, "outerWidth", fakeWidth);
 
-        Object.defineProperty(window.screen, "availHeight", {get: () => {
-            return window.innerHeight + Math.random()
-        }});
-
-        Object.defineProperty(window.screen, "height", {get: () => {
-            return window.innerHeight + Math.random()
-        }});
-
-        // Just never let people see the actual outer size
-        Object.defineProperty(window, "outerWidth", {get: () => {
-            return window.innerWidth + Math.random()
-        }});
-
-        Object.defineProperty(window, "outerHeight", {get: () => {
-            return window.innerHeight + Math.random()
-        }});
+        setGet(window.screen, "availHeight", fakeHeight);
+        setGet(window.screen, "height", fakeHeight);
+        setGet(window, "outerHeight", fakeHeight);
 
         // fucking webgl is hard to get rid of
         delete window.WebGL2RenderingContext
@@ -139,7 +153,9 @@
 
 
         // Since noone seem to get canvas fingerprinting avoidance right
-        // We need to get consistent noise for each instance
+        // We need to get consistent noise for each instance,
+        // which is one way fingerprinting code detects other anti-canvas
+        // fingerprinting extensions
         const shift = {
             'r': Math.floor(Math.random() * 10) - 5,
             'g': Math.floor(Math.random() * 10) - 5,
@@ -149,6 +165,9 @@
 
         // to make sure the js never sees that we fuck with it,
         // we restore the contents after generating whatever it wants
+        // Other extensions that try to break canvas fingerprinting are
+        // detected because the fingerprinting code makes sure the canvas
+        // content doesn't get modified
         var canvasContentBackup
 
         function garbleCanvas(canvas) {
