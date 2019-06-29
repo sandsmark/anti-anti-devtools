@@ -115,8 +115,6 @@
         setProp(document, 'referrer', 'fuckyou')
         setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36')
 
-        setProp(Date.prototype, "getTimezoneOffset", 0)
-
         Date.prototype.getTimezoneOffset = function() { return 0; }
 
         // Checking outerWidth is what people do to check if the devtools pane is open, so fuck that up
