@@ -161,6 +161,19 @@
             'a': Math.floor(Math.random() * 10) - 5
         };
 
+        function garbleImage(image, width, height) {
+            for (let row = 0; row < height; row += 3) {
+                for (let col = 0; col < width; col += 3) {
+                    const index = ((row * (width * 4)) + (col * 4));
+                    image.data[index + 0] = image.data[index + 0] + shift.r;
+                    image.data[index + 1] = image.data[index + 1] + shift.g;
+                    image.data[index + 2] = image.data[index + 2] + shift.b;
+                    image.data[index + 3] = image.data[index + 3] + shift.a;
+                }
+            }
+        }
+        const orig_getImageData = CanvasRenderingContext2D.prototype.getImageData;
+
         // to make sure the js never sees that we fuck with it,
         // we restore the contents after generating whatever it wants
         // Other extensions that try to break canvas fingerprinting are
@@ -171,21 +184,12 @@
         function garbleCanvas(canvas) {
             const {width, height} = canvas
             const context = canvas.getContext('2d')
-            const image = context.getImageData(0, 0, canvas.width, canvas.height)
+            const image = orig_getImageData.call(context, 0, 0, width, height)
 
             // not sure if we need to do this, or if we can reuse the image,
             // but javascript is slow crap anyways so fuck performance
-            canvasContentBackup = context.getImageData(0, 0, canvas.width, canvas.height)
-
-            for (let row = 0; row < height; row += 3) {
-                for (let col = 0; col < width; col += 3) {
-                    const index = ((row * (width * 4)) + (col * 4));
-                    image.data[index + 0] = image.data[index + 0] + shift.r;
-                    image.data[index + 1] = image.data[index + 1] + shift.g;
-                    image.data[index + 2] = image.data[index + 2] + shift.b;
-                    image.data[index + 3] = image.data[index + 3] + shift.a;
-                }
-            }
+            canvasContentBackup = orig_getImageData.call(context, 0, 0, width, height)
+            garbleImage(image, width, height)
 
             context.putImageData(image, 0, 0);
         }
@@ -212,6 +216,14 @@
                 garbleCanvas(this)
                 const ret = orig_toDataURL.apply(this, arguments);
                 ungarbleCanvas(this)
+                return ret
+            }
+        });
+
+        Object.defineProperty(CanvasRenderingContext2D.prototype, 'getImageData', {
+            value: function() {
+                ret = orig_getImageData.apply(this, arguments);
+                garbleImage(ret, this.canvas.width, this.canvas.height)
                 return ret
             }
         });
