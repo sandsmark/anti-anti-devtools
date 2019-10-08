@@ -179,6 +179,22 @@
         setProp(UserActivation.prototype, 'hasBeenActive', false)
 
 
+        /////////////////////
+        // Don't allow locking the keyboard
+        try {
+            Keyboard.prototype.lock = function(keys) {
+                console.log("Tried to lock keyboard: " + keys)
+                return new Promise(function(resolve, reject) {
+                    setTimeout(function() {
+                        resolve();
+                    }, 300);
+                });
+            }
+        } catch(e) {
+            console.log("Failed to override keyboard locking: " + e)
+        }
+
+
         const orig_resolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions
         Intl.DateTimeFormat.prototype.resolvedOptions = function() {
             var ret = orig_resolvedOptions.apply(this, arguments)
