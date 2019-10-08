@@ -164,7 +164,11 @@
         }
 
         setProp(navigator, 'hardwareConcurrency', 1)
-        setProp(navigator, 'connection', undefined)
+        setProp(NetworkInformation.prototype, 'downlink',  1000)
+        setProp(NetworkInformation.prototype, 'effectiveType',  '4g')
+        setProp(NetworkInformation.prototype, 'rtt',  0)
+        setProp(NetworkInformation.prototype, 'saveData',  true)
+
         setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.38 Safari/537.36')
         setProp(navigator, 'languages', ['en-US', 'en'])
         setProp(navigator, 'platform', 'Win64')
