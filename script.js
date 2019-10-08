@@ -203,6 +203,62 @@
         }
         Date.prototype.getTimezoneOffset = function() { return 0; }
 
+        function dumpBuf(result) {
+            var buf = new Int8Array(result)
+            var decoded = ""
+            var valid = true
+            for (var i=0; i<Math.min(buf.length, 1024); i++) {
+                if ((buf[i] < 32 || buf[i] > 126) && buf[i] != 9 && buf[i] != 10 && buf[i] != 13) {
+                    decoded += "\\x" + buf[i].toString(16)
+                    valid = false;
+                    continue;
+                }
+
+                decoded += String.fromCharCode(buf[i])
+            }
+
+            console.log(decoded)
+            if (!valid) {
+                console.log(result)
+            }
+        }
+
+        const orig_decrypt = SubtleCrypto.prototype.decrypt
+        SubtleCrypto.prototype.decrypt = function(algorithm, key, data) {
+            var crypt = this
+            return new Promise(function(resolve, reject) {
+                orig_decrypt.call(crypt, algorithm, key, data).then(
+                    function(result) {
+                        console.log("decrypted")
+                        dumpBuf(result)
+                        resolve(result);
+                    }
+                )
+            });
+        }
+        const orig_encrypt = SubtleCrypto.prototype.encrypt
+        SubtleCrypto.prototype.encrypt = function(algorithm, key, data) {
+            console.log("encrypting")
+            dumpBuf(data)
+            var crypt = this
+            return new Promise(function(resolve, reject) {
+                orig_encrypt.call(crypt, algorithm, key, data).then(
+                    function(result) {
+                        resolve(result);
+                    }
+                )
+            });
+        }
+
+        SubtleCrypto.prototype.verify = function(algorithm, key, signature, data) {
+            console.log("Trying to verify some shit, alg " + algorithm.name + " hash name " + algorithm.hash.name);
+            return new Promise(function(resolve, reject) {
+                setTimeout(function() {
+                    console.log("Of course it's ok, you can trust the client")
+                    resolve(true);
+                }, 1000);
+            });
+        }
 
         /////////////////////
         // Checking outerWidth is what people do to check if the devtools pane is open, so fuck that up
