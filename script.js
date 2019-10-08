@@ -179,6 +179,12 @@
         setProp(UserActivation.prototype, 'hasBeenActive', false)
 
 
+        const orig_resolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions
+        Intl.DateTimeFormat.prototype.resolvedOptions = function() {
+            var ret = orig_resolvedOptions.apply(this, arguments)
+            ret.timeZone = "UTC"
+            return ret
+        }
         Date.prototype.getTimezoneOffset = function() { return 0; }
 
 
