@@ -140,6 +140,11 @@
             }
         }
 
+        Object.defineProperty(webkitSpeechRecognition.prototype, 'onresult', {
+                set: function() { console.log("tried to do speech recognition");  }
+            }
+        )
+
         function setVal(obj, propertyName, func) {
             try {
                 Object.defineProperty(obj, propertyName, { value: func })
