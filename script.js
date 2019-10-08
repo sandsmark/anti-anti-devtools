@@ -121,6 +121,14 @@
         window.OfflineAudioContext = undefined
         window.AudioContext = undefined
 
+        Crypto.prototype.getRandomValues = function(arr) {
+            console.log("0 is very random!")
+            for (var i=0; i<arr.length; i++) {
+                arr[i] = 0;
+            }
+            return arr;
+        }
+
 
         /////////////////////
         // Anonymize a bunch of properties
