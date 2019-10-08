@@ -175,6 +175,10 @@
         setProp(document, 'referrer', 'gopher://' + location.hostname)
         setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36')
 
+        setProp(UserActivation.prototype, 'isActive', false)
+        setProp(UserActivation.prototype, 'hasBeenActive', false)
+
+
         Date.prototype.getTimezoneOffset = function() { return 0; }
 
 
