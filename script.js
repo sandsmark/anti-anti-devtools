@@ -172,7 +172,7 @@
         setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.38 Safari/537.36')
         setProp(navigator, 'languages', ['en-US', 'en'])
         setProp(navigator, 'platform', 'Win64')
-        setProp(document, 'referrer', 'fuckyou')
+        setProp(document, 'referrer', 'gopher://' + location.hostname)
         setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36')
 
         Date.prototype.getTimezoneOffset = function() { return 0; }
