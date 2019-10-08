@@ -107,7 +107,9 @@
 
         /////////////////////
         // Defuse a bunch of dumb APIs
-        navigator.getBattery = function() { return undefined; }
+        navigator.getBattery = () => undefined
+        navigator.getBattery.toString = () => "function getBattery() { [native code] }"
+
         window.devicePixelRatio = 1
         window.screen = {}
         window.screen.colorDepth = 24
