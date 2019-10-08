@@ -155,7 +155,8 @@
 
         /////////////////////
         // Beacons are dumb
-        setGet(navigator, 'sendBeacon', function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; })
+        navigator.sendBeacon = function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; }
+        navigator.sendBeacon.toString = () => "function sendBeacon() { [native code] }";
 
 
         function setProp(obj, propertyName, val) {
