@@ -121,14 +121,6 @@
         window.OfflineAudioContext = undefined
         window.AudioContext = undefined
 
-        Crypto.prototype.getRandomValues = function(arr) {
-            console.log("0 is very random!")
-            for (var i=0; i<arr.length; i++) {
-                arr[i] = 0;
-            }
-            return arr;
-        }
-
 
         /////////////////////
         // Anonymize a bunch of properties
@@ -221,6 +213,15 @@
             if (!valid) {
                 console.log(result)
             }
+        }
+
+        const orig_random = Crypto.prototype.getRandomValues
+        var notRandomArrayValue = 0
+        Crypto.prototype.getRandomValues = function(arr) {
+            for (var i=0; i<arr.length; i++) {
+                arr[i] = notRandomArrayValue++
+            }
+            return arr;
         }
 
         const orig_decrypt = SubtleCrypto.prototype.decrypt
