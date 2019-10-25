@@ -164,11 +164,11 @@ setProp(NetworkInformation.prototype, 'effectiveType',  '4g')
 setProp(NetworkInformation.prototype, 'rtt',  0)
 setProp(NetworkInformation.prototype, 'saveData',  true)
 
-setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36')
+setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36')
 setProp(navigator, 'languages', ['en-US', 'en'])
 setProp(navigator, 'platform', 'Win64')
 setProp(document, 'referrer', location.protocol + '://' + location.hostname)
-setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36')
+setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36')
 
 setProp(UserActivation.prototype, 'isActive', false)
 setProp(UserActivation.prototype, 'hasBeenActive', false)
