@@ -16,6 +16,33 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
     return {requestHeaders: headers};
 }, requestFilter, ['requestHeaders','blocking','extraHeaders']);
 
+var disabledOn = -1;
+
+chrome.webRequest.onHeadersReceived.addListener(function(details) {
+    console.log('tab:' + details.tabId)
+    var headers = details.responseHeaders;
+
+    const enabled = (disabledOn === -1 || details.tabId !== disabledOn) ? 'dofuck' : 'nofuck'; 
+
+    for(var i = 0, l = headers.length; i < l; ++i) {
+        if (headers[i].name.toLowerCase() != 'set-cookie') {
+            continue
+        }
+
+        var cookieName = headers[i].value.split('=')[0]
+        if (cookieName.toLowerCase() != 'Fuckings-To-The-Internet') {
+            continue;
+        }
+        // idk if this is necessary, since we always get ours last, but just in case
+        headers[i].value = `Fuckings-To-The-Internet=${enabled}; Max-Age=0;`
+    }
+    headers.push({
+        name: "set-cookie",
+        value: `Fuckings-To-The-Internet=${enabled};`
+    });
+    return {responseHeaders: headers};
+}, requestFilter, ['responseHeaders', 'blocking', 'extraHeaders']);
+
 const canvas = document.createElement('canvas'); // Create the canvas
 canvas.width = 16;
 canvas.height = 16;
@@ -91,14 +118,23 @@ function draw() {
 
 var interval = null;
 
-chrome.browserAction.onClicked.addListener(function() {
+chrome.tabs.onActivated.addListener(function(tab) {
+    if (disabledOn === -1) {
+        return
+    }
+})
+
+chrome.browserAction.onClicked.addListener(function(tab) {
+    console.log("clicked on: " + tab.id)
     if (interval) {
+        disabledOn = -1
         clearInterval(interval);
         interval = null
         chrome.browserAction.setIcon({
             path: "icon.png"
         });
     } else {
+        disabledOn = tab.id
         interval = setInterval(draw, 66);
     }
 });

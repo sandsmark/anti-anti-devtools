@@ -2,6 +2,22 @@
     var toInject = 
        // Hurr durr javascript
 '(' + function() {
+
+/// Only way to communicate between the background script and content script apparently
+function getCookie(cookie) { // https://stackoverflow.com/a/19971550/934239
+  return document.cookie.split(';').reduce(function(prev, c) {
+    var arr = c.split('=');
+    return (arr[0].trim() === cookie) ? arr[1] : prev;
+  }, undefined);
+}
+
+const enabled = getCookie('Fuckings-To-The-Internet') !== 'nofuck';
+document.cookie = 'Fuckings-To-The-Internet=; Max-Age=0';
+
+if (!enabled) {
+    console.warn('anti-devtools disabled in this tab')
+}
+
 //////////////////////////////////////////////
 ////////////////////////// begin actual script
 //////////////////////////////////////////////
@@ -153,16 +169,21 @@ function setVal(obj, propertyName, func) {
 navigator.sendBeacon = function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; }
 navigator.sendBeacon.toString = () => "function sendBeacon() { [native code] }";
 
+////////////////////
+// Generally dumb shit
 
 function setProp(obj, propertyName, val) {
     setGet(obj, propertyName, () => val)
 }
 
-setProp(navigator, 'hardwareConcurrency', 1)
 setProp(NetworkInformation.prototype, 'downlink',  1000)
 setProp(NetworkInformation.prototype, 'effectiveType',  '4g')
 setProp(NetworkInformation.prototype, 'rtt',  0)
 setProp(NetworkInformation.prototype, 'saveData',  true)
+
+setProp(navigator.credentials, 'get', function() { return 'no'; })
+
+setProp(navigator, 'hardwareConcurrency', 1)
 
 setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36')
 setProp(navigator, 'languages', ['en-US', 'en'])
