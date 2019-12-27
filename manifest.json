@@ -27,5 +27,6 @@
    "name": "anti anti devtools",
    "short_name": "AAD",
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "2.3"
+   "version": "2.3",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAowA8wOUQ8ShyITJ15B9rcJrnoolyo+OLj07g8QWBlEBikgszYwlbc88OIRL+dJOASok3yG6RQ60fvIjBrtNEk1yQZJfNwF/CN0jFrkE3HN3xVMoX0XIQPB93kDZARcfR5nwU3RUgwwWGTqt69KSSU8QzRRQJSEgM8GENa3OBhw1UBn/I/RbhaFcTykJSomo9j55goJwNzUhXTJk458DQ5diY+gWMadDXlDBa8cciCVlaGOjBV5ezmxnD6p1GXhrvyEKZP8IlreDJC2Nw9hxrT3GIo1FzbmeDPANKJ9pkY1H3LOVsGJDtytBpD/FRErlvfkJVqp3N5ifF2EQ8lOAHrQIDAQAB"
 }
