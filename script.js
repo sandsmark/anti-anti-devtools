@@ -211,6 +211,121 @@ try {
 }
 
 
+/////////////////////
+// Protect clipboard
+
+// TODO: return promise that sends request to background script
+// which shows a popup for each request.
+const orig_clipboardRead = navigator.clipboard.read;
+navigator.clipboard.read = function() {
+    console.log("Clipboard read");
+    console.log(this);
+    console.log(arguments);
+    orig_clipboardRead.apply(this, arguments);
+
+    //return new Promise() {
+    //    setTimeout(function() {
+    //        resolve('foo');
+    //    }, 300);
+    //}
+}
+
+const orig_clipboardReadText = navigator.clipboard.readText;
+navigator.clipboard.readText = function() {
+    console.log("Clipboard read text");
+    console.log(this);
+    console.log(arguments);
+    orig_clipboardReadText.apply(this, arguments);
+
+    //return new Promise() {
+    //    setTimeout(function() {
+    //        resolve('foo');
+    //    }, 300);
+    //}
+}
+
+const orig_clipboardWrite = navigator.clipboard.write;
+navigator.clipboard.write = function(content) {
+    console.log("Clipboard write");
+    console.log(this);
+    console.log(arguments);
+    const context = this;
+    sleep(500);
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            orig_clipboardWrite.call(this, content).then(function() {
+                resolve();
+            });
+        }, hourlyRandom() * 250 + 250);// stop tricks with quickly replacing clipboard contents
+    });
+}
+
+const orig_clipboardWriteText = navigator.clipboard.writeText;
+navigator.clipboard.writeText = function(text) {
+    console.log("Clipboard write text");
+    console.log(this);
+    console.log(arguments);
+    sleep(500);
+    const context = this;
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            orig_clipboardWriteText.call(context, text).then(function() {
+                resolve();
+            });
+        }, Math.random() * 250 + 250);// stop tricks with quickly replacing clipboard contents, this will make sure they are replaced in the wrong order (probably), or at least delayed
+    });
+}
+
+const orig_execCommand = document.execCommand
+document.execCommand = function()
+{
+    var isCopy = false;
+    var isCut = false;
+    var isPaste = false;
+    for (var i=0; i<arguments.length; i++) {
+        if (arguments[i] == "copy") {
+            isCopy = true;
+            continue;
+        }
+        if (arguments[i] == "cut") {
+            isCut = true;
+            continue;
+        }
+        if (arguments[i] == "paste") {
+            isPaste = true;
+            continue;
+        }
+    }
+    if (isCopy) {
+        console.log("is copy");
+        sleep(Math.random() * 250 + 250);
+        const ret = orig_execCommand.apply(this, arguments)
+        console.log(ret);
+        //return ret;
+    }
+    if (isCut) {
+        console.log("is cut");
+        sleep(Math.random() * 250 + 250);
+        const ret = orig_execCommand.apply(this, arguments)
+        console.log(ret);
+        //return ret;
+    }
+    if (isPaste) {
+        console.log("is paste");
+        //const ret = orig_execCommand.apply(this, arguments)
+        return false;
+    }
+    console.log(arguments); console.log(this);
+    const ret = orig_execCommand.apply(this, arguments)
+    console.log("was not clipboard");
+    console.log(ret);
+    return ret;
+}
+
+
+//////////////////////////
+// Date time anonymization
+
 const orig_resolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions
 Intl.DateTimeFormat.prototype.resolvedOptions = function() {
     var ret = orig_resolvedOptions.apply(this, arguments)
@@ -238,6 +353,10 @@ function dumpBuf(result) {
         console.log(result)
     }
 }
+
+
+///////////////
+// Kill crypto
 
 const orig_random = Crypto.prototype.getRandomValues
 var notRandomArrayValue = 0
