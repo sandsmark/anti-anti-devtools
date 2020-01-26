@@ -27,48 +27,49 @@ if (!enabled) {
 ////////////////////////// begin actual script
 //////////////////////////////////////////////
 
+
 /////////////////////
 // For generating consistent randomness
 // We get consistent randomness in a time window of ten minutes
 //
 
 function simpleHash(str) {
-    var h = 0
+    var h = 0;
     for (var i = 0; i < str.length; i++) {
         h = Math.imul(31, h) + str.charCodeAt(i);
-        h %= 4294967295
+        h %= 4294967295;
     }
-    return h
+    return h;
 }
 
 var LCG=s=>()=>(2**31-1&(s=Math.imul(48271,s)))/2**31;
-const date = new Date()
+const date = new Date();
 
 // Decided against using the window.location because some inject code
 // to run in about:blank (or another host and get the value back),
 // which would make this moot
-const hourlySeed = simpleHash(/*window.location.hostname + */ date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString())
-var hourlyRandom = LCG(hourlySeed)
+const hourlySeed = simpleHash(/*window.location.hostname + */ date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString());
+var hourlyRandom = LCG(hourlySeed);
 
 
 /////////////////////
 // Avoid detection of devtools being open
 //
 
-var orig_debug = console.debug
-var orig_info = console.info
-var orig_log = console.log
-var orig_warn = console.warn
-var orig_dir = console.warn
+var orig_debug = console.debug;
+var orig_info = console.info;
+var orig_log = console.log;
+var orig_warn = console.warn;
+var orig_dir = console.dir;
 
 // Devtools tries to do introspection, so defuse these
 function checkForProperty(argument, property) {
-    var idProperties = Object.getOwnPropertyDescriptor(argument, property)
+    var idProperties = Object.getOwnPropertyDescriptor(argument, property);
     // I'm not sure if this is a good idea, but whatever
     if (idProperties !== undefined && 'get' in idProperties && typeof idProperties['get'] === 'function') {
-        return true
+        return true;
     }
-    return false
+    return false;
 }
 
 // Avoid timing attacks on the console.* functions
@@ -84,38 +85,38 @@ function saferPrint(argument, originalFunction) {
     // Defuse the toString() trick
     if (typeof argument === 'object' && argument !== null) {
         if (checkForProperty(argument, 'id') || checkForProperty(argument, 'nodeType')) {
-            return
+            return;
         }
     } else if (typeof argument === 'string') {
-        argument = argument.trim()
+        argument = argument.trim();
     }
 
     // Just in case there's some other clever tricks, do this every time
     try {
         if (typeof argument === 'object' && argument !== null) {
-            var props = Object.getOwnPropertyNames(argument)
+            var props = Object.getOwnPropertyNames(argument);
             for (var i=0; i<props.length; i++) {
-                var dummy = argument[props[i]]
+                var dummy = argument[props[i]];
             }
         }
 
-        originalFunction(argument)
+        originalFunction(argument);
     } catch(e) {}
 
     // Defuse timing attacks
     // By default it will sleep about 1ms, but it adjusts to the time it
     // takes to print to the console
     var t1 = performance.now();
-    var duration = t1 - t0
-    sleepDuration = Math.max(sleepDuration, duration)
-    sleep(sleepDuration - duration)
+    var duration = t1 - t0;
+    sleepDuration = Math.max(sleepDuration, duration);
+    sleep(sleepDuration - duration);
 }
 
-console.debug = function(argument) { saferPrint(argument, orig_debug) }
-console.info = function(argument) { saferPrint(argument, orig_info) }
-console.log = function(argument) { saferPrint(argument, orig_log) }
-console.warn = function(argument) { saferPrint(argument, orig_warn) }
-console.dir = function(argument) { saferPrint(argument, orig_dir) }
+console.debug = function(argument) { saferPrint(argument, orig_debug); }
+console.info = function(argument) { saferPrint(argument, orig_info); }
+console.log = function(argument) { saferPrint(argument, orig_log); }
+console.warn = function(argument) { saferPrint(argument, orig_warn); }
+console.dir = function(argument) { saferPrint(argument, orig_dir); }
 
 // We don't want them to hide stuff from us
 console.clear = function() { }
