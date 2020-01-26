@@ -2,6 +2,41 @@ var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (K
 
 var requestFilter = { urls: [ "<all_urls>" ] };
 
+/////////////////////
+// For generating consistent randomness
+// We get consistent randomness in a time window of ten minutes
+//
+
+function simpleHash(str) {
+    var h = 0;
+    for (var i = 0; i < str.length; i++) {
+        h = Math.imul(31, h) + str.charCodeAt(i);
+        h %= 4294967295;
+    }
+    return h;
+}
+
+var LCG=s=>()=>(2**31-1&(s=Math.imul(48271,s)))/2**31;
+const date = new Date();
+
+// Decided against using the window.location because some inject code
+// to run in about:blank (or another host and get the value back),
+// which would make this moot
+const hourlySeed = simpleHash(/*window.location.hostname + */ date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString());
+var hourlyRandom = LCG(hourlySeed);
+
+function randomChars(len) {
+    var chars = '';
+
+    while (chars.length < len) {
+        chars += hourlyRandom().toString(36).substring(2);
+    }
+
+    // Remove unnecessary additional characters.
+    return chars.substring(0, len);
+}
+const generatedFpJsVid = randomChars(20);
+
 chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
     var headers = details.requestHeaders;
     for(var i = 0, l = headers.length; i < l; ++i) {
@@ -11,8 +46,31 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
             headers[i].value = 'en-US,en;q=0.8';
         } else if( headers[i].name == 'Accept' && details.url.indexOf("yahoo.com/") != -1 ) {
             headers[i].value = 'accept: application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3';
+        } else if( headers[i].name.toLowerCase() == 'cookie' && (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1)) {
+            //console.log(headers);
+            var newHeader = ''
+            const cookies = headers[i].value.split(';')
+            var replacedCookie = false;
+
+            for (var cookie in cookies) {
+                var cookieName = cookies[cookie].split('=')[0].trim()
+                if (cookieName == '_vid') {
+                    newHeader += `_vid=` + generatedFpJsVid + `; Max-Age=0;`
+                    console.log("replaced vid, old " + cookies[cookie].split('=')[1].trim() + ", new " + generatedFpJsVid);
+                    replacedCookie = true;
+                } else if (cookieName == 'Fuckings-To-The-Internet') {
+                    console.log("Skipping internal");
+                    continue;
+                } else {
+                    newHeader += cookies[cookie] + ';';
+                }
+            }
+            if (replacedCookie) {
+                headers[i].value = newHeader;
+            }
         }
     }
+
     return {requestHeaders: headers};
 }, requestFilter, ['requestHeaders','blocking','extraHeaders']);
 
@@ -30,11 +88,10 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
         }
 
         var cookieName = headers[i].value.split('=')[0]
-        if (cookieName.toLowerCase() != 'Fuckings-To-The-Internet') {
+        if (cookieName.toLowerCase() == '_vid') {
+            headers[i].value = `_vid=foo; Max-Age=0;`
             continue;
         }
-        // idk if this is necessary, since we always get ours last, but just in case
-        headers[i].value = `Fuckings-To-The-Internet=${enabled}; Max-Age=0;`
     }
     headers.push({
         name: "set-cookie",
