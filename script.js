@@ -151,6 +151,15 @@ function setGet(obj, propertyName, func) {
     }
 }
 
+// Disable overriding
+function setSet(obj, propertyName, func) {
+    try {
+        Object.defineProperty(obj, propertyName, { set: func })
+    } catch (exception) {
+        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception)
+    }
+}
+
 Object.defineProperty(webkitSpeechRecognition.prototype, 'onresult', {
         set: function() { console.log("tried to do speech recognition");  }
     }
@@ -209,6 +218,33 @@ try {
 } catch(e) {
     console.log("Failed to override keyboard locking: " + e)
 }
+
+const orig_addEventListener = window.addEventListener;
+setProp(window, 'addEventListener', function(type, listener, options) {
+        if (type == 'beforeunload') {
+            console.log('denied listener before unload', listener);
+            return;
+        }
+        return orig_addEventListener(type, listener, options);
+    }
+);
+
+///////////////////////////////////
+// Nuke the 'are you sure you want to leave' if I haven't interacted with the page
+var hasInteracted = false;
+window.addEventListener('click', function() { hasInteracted = true; } , true);
+
+var warnUnload = false;
+window.onbeforeunload = function(e) {
+    if (hasInteracted && warnUnload) {
+        console.log('has interacted, allowing warning about unloading page');
+        return 'Allow warning';
+    }
+}
+
+setSet(window, 'onbeforeunload', function() {
+    warnUnload = true;
+})
 
 
 /////////////////////
