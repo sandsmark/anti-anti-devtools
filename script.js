@@ -11,11 +11,16 @@ function getCookie(cookie) { // https://stackoverflow.com/a/19971550/934239
   }, undefined);
 }
 
+function delete_cookie( name ) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
 const enabled = getCookie('Fuckings-To-The-Internet') !== 'nofuck';
-document.cookie = 'Fuckings-To-The-Internet=; Max-Age=0';
+delete_cookie('Fuckings-To-The-Internet');
 
 if (!enabled) {
-    console.warn('anti-devtools disabled in this tab')
+    console.warn('anti-devtools disabled in this tab');
+    return;
 }
 
 //////////////////////////////////////////////
