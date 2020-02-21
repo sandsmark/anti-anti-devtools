@@ -2,6 +2,8 @@ var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (K
 
 var requestFilter = { urls: [ "<all_urls>" ] };
 
+const fuckingsCookieName = 'Fuckings-To-The-Internet';
+
 /////////////////////
 // For generating consistent randomness
 // We get consistent randomness in a time window of ten minutes
@@ -22,7 +24,7 @@ const date = new Date();
 // Decided against using the window.location because some inject code
 // to run in about:blank (or another host and get the value back),
 // which would make this moot
-const hourlySeed = simpleHash(/*window.location.hostname + */ date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString());
+const hourlySeed = simpleHash(date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString());
 var hourlyRandom = LCG(hourlySeed);
 
 function randomChars(len) {
@@ -39,6 +41,7 @@ const generatedFpJsVid = randomChars(20);
 
 chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
     var headers = details.requestHeaders;
+    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1);
     for(var i = 0, l = headers.length; i < l; ++i) {
         if( headers[i].name == 'User-Agent' ) {
             headers[i].value = userAgent;
@@ -46,22 +49,22 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
             headers[i].value = 'en-US,en;q=0.8';
         } else if( headers[i].name == 'Accept' && details.url.indexOf("yahoo.com/") != -1 ) {
             headers[i].value = 'accept: application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3';
-        } else if( headers[i].name.toLowerCase() == 'cookie' && (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1)) {
-            //console.log(headers);
+        } else if( headers[i].name.toLowerCase() == 'cookie') {
             var newHeader = ''
             const cookies = headers[i].value.split(';')
             var replacedCookie = false;
 
             for (var cookie in cookies) {
                 var cookieName = cookies[cookie].split('=')[0].trim()
-                if (cookieName == '_vid') {
+                if (isFingerprint && cookieName == '_vid') {
                     newHeader += `_vid=` + generatedFpJsVid + `; Max-Age=0;`
                     console.log("replaced vid, old " + cookies[cookie].split('=')[1].trim() + ", new " + generatedFpJsVid);
                     replacedCookie = true;
-                } else if (cookieName == 'Fuckings-To-The-Internet') {
+                } else if (cookieName == fuckingsCookieName) {
                     console.log("Skipping internal");
+                    replacedCookie = true;
                     continue;
-                } else {
+                } else if (!isFingerprint) {
                     newHeader += cookies[cookie] + ';';
                 }
             }
@@ -76,11 +79,12 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
 
 var disabledOn = -1;
 
+let disabledIn = new Set();
+
 chrome.webRequest.onHeadersReceived.addListener(function(details) {
-    console.log('tab:' + details.tabId)
     var headers = details.responseHeaders;
 
-    const enabled = (disabledOn === -1 || details.tabId !== disabledOn) ? 'dofuck' : 'nofuck'; 
+    const enabled = disabledIn.has(details.tabId) ? 'nofuck' : 'dofuck'; 
 
     for(var i = 0, l = headers.length; i < l; ++i) {
         if (headers[i].name.toLowerCase() != 'set-cookie') {
@@ -175,24 +179,32 @@ function draw() {
 
 var interval = null;
 
-chrome.tabs.onActivated.addListener(function(tab) {
-    if (disabledOn === -1) {
-        return
+function updateIcon(tab) {
+    if (disabledIn.has(tab)) {
+        if (!interval) {
+            interval = setInterval(draw, 66);
+        }
+    } else {
+        if (interval) {
+            clearInterval(interval);
+            interval = null
+            chrome.browserAction.setIcon({
+                path: "icon.png"
+            });
+        }
     }
+}
+
+chrome.tabs.onActivated.addListener(function(tab) {
+    updateIcon(tab.tabId);
 })
 
 chrome.browserAction.onClicked.addListener(function(tab) {
-    console.log("clicked on: " + tab.id)
-    if (interval) {
-        disabledOn = -1
-        clearInterval(interval);
-        interval = null
-        chrome.browserAction.setIcon({
-            path: "icon.png"
-        });
+    if (disabledIn.has(tab.id)) {
+        disabledIn.delete(tab.id);
     } else {
-        disabledOn = tab.id
-        interval = setInterval(draw, 66);
+        disabledIn.add(tab.id);
     }
+    updateIcon(tab.id);
 });
 

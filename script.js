@@ -12,11 +12,13 @@ function getCookie(cookie) { // https://stackoverflow.com/a/19971550/934239
 }
 
 function delete_cookie( name ) {
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
-const enabled = getCookie('Fuckings-To-The-Internet') !== 'nofuck';
-delete_cookie('Fuckings-To-The-Internet');
+const fuckingsCookieName = 'Fuckings-To-The-Internet';
+
+const enabled = getCookie(fuckingsCookieName) !== 'nofuck';
+delete_cookie(fuckingsCookieName);
 
 if (!enabled) {
     console.warn('anti-devtools disabled in this tab');
