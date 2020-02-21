@@ -707,6 +707,48 @@ Object.defineProperty(WebGLRenderingContext.prototype, 'getParameter', {
 //    }
 //});
 
+
+///////////////////////////////
+// Kill detection of incognito
+const orig_storageEstimate = navigator.storage.estimate;
+navigator.storage.estimate = function() {
+    const context = this;
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            orig_storageEstimate.call(context).then(function(estimate) {
+                estimate.quota = hourlyRandom() * 2500000 + 120000000;
+                console.log(estimate);
+                resolve(estimate);
+            });
+        }, Math.random() * 250 + 250); // Kill timing attacks
+    });
+}
+
+const orig_webkitRequestFileSystem = window.webkitRequestFileSystem;
+
+window.webkitRequestFileSystem = function(type, size, successCallback, errorCallback) {
+    orig_log("Requesting filesystem");
+    //orig_log(this);
+    //orig_log(arguments);
+    const yes = () => orig_log("is in incognito");
+    const no = () => orig_log("is not in incognito");
+    //orig_webkitRequestFileSystem(window.TEMPORARY, 100, not, yes);
+    orig_webkitRequestFileSystem(type, 100, successCallback, errorCallback);
+    //orig_webkitRequestFileSystem(window.TEMPORARY, 100, successCallback, errorCallback);
+}
+
+//const orig_requestFileSystem = window.requestFileSystem;
+//window.requestFileSystem = function(type, size, successCallback, errorCallback) {
+//    orig_log("Requesting filesystem old");
+//    orig_log(this);
+//    orig_log(arguments);
+//
+//    const yes = () => orig_log("is in incognito");
+//    const no = () => orig_log("is not in incognito");
+//    orig_requestFileSystem.call(window.TEMPORARY, 10485760, successCallback, errorCallback);
+//    //return orig_requestFileSystem(type, size, successCallback, errorCallback);
+//}
+
 console.log("devtools detect stuff overriden")
 
 ////////////////////////////////////////////
