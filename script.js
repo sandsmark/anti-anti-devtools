@@ -203,7 +203,13 @@ setProp(NetworkInformation.prototype, 'effectiveType',  '4g')
 setProp(NetworkInformation.prototype, 'rtt',  0)
 setProp(NetworkInformation.prototype, 'saveData',  true)
 
-setProp(navigator.credentials, 'get', function() { return 'no'; })
+setProp(navigator.credentials, 'get', function() {
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            resolve({});
+        }, 300);
+    });
+})
 
 setProp(navigator, 'hardwareConcurrency', 1)
 
