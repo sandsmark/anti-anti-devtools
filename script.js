@@ -206,7 +206,7 @@ setProp(NetworkInformation.prototype, 'saveData',  true)
 setProp(navigator.credentials, 'get', function() {
     return new Promise(function(resolve, reject) {
         setTimeout(function() {
-            resolve({});
+            reject();
         }, 300);
     });
 })
