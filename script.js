@@ -24,6 +24,11 @@ if (!enabled) {
     console.warn('anti-devtools disabled in this tab');
     return;
 }
+const isFingerprint = (window.location.hostname.indexOf("fingerprintjs.com") != -1 || window.location.hostname.indexOf("fpjs.io") != -1);
+if (isFingerprint) {
+    localStorage.removeItem('_vid');
+    delete_cookie('_vid');
+}
 
 //////////////////////////////////////////////
 ////////////////////////// begin actual script
@@ -50,7 +55,7 @@ const date = new Date();
 // Decided against using the window.location because some inject code
 // to run in about:blank (or another host and get the value back),
 // which would make this moot
-const hourlySeed = simpleHash(/*window.location.hostname + */ date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString());
+const hourlySeed = simpleHash((isFingerprint ? Math.random() : '') + date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString());
 var hourlyRandom = LCG(hourlySeed);
 
 
