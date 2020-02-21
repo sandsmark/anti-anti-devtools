@@ -261,8 +261,13 @@ window.onbeforeunload = function(e) {
     }
 }
 
-setSet(window, 'onbeforeunload', function() {
-    warnUnload = true;
+setSet(window, 'onbeforeunload', function(callback) {
+    const result = callback();
+    if (result && result != "") {
+        console.log(callback);
+        console.warn("Warning because of result: " + result);
+        warnUnload = true;
+    }
 })
 
 
