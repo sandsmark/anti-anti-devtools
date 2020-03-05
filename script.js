@@ -761,6 +761,18 @@ window.webkitRequestFileSystem = function(type, size, successCallback, errorCall
 
 console.log("devtools detect stuff overriden")
 
+function addStyleString(str) {
+    var node = document.createElement('style');
+    node.innerHTML = str;
+    document.body.appendChild(node);
+}
+if (window.location.hostname.indexOf("slideshare.net") != -1) {
+    setTimeout(function() {
+        addStyleString(".large-8 { width: 100%; }")
+        console.log("fixed slideshare css")
+    }, 100);
+}
+
 ////////////////////////////////////////////
 ////////////////////////// end actual script
 ////////////////////////////////////////////
