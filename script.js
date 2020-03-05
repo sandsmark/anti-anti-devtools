@@ -173,6 +173,15 @@ function setSet(obj, propertyName, func) {
     }
 }
 
+function setGetSet(obj, propertyName, getFunc, setFunc) {
+    try {
+        Object.defineProperty(obj, propertyName, { set: setFunc, get: getFunc })
+    } catch (exception) {
+        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception)
+    }
+}
+
+
 Object.defineProperty(webkitSpeechRecognition.prototype, 'onresult', {
         set: function() { console.log("tried to do speech recognition");  }
     }
@@ -239,13 +248,14 @@ try {
 }
 
 const orig_addEventListener = window.addEventListener;
-setProp(window, 'addEventListener', function(type, listener, options) {
+setGetSet(window, 'addEventListener', () => function(type, listener, options) {
         if (type == 'beforeunload') {
             console.log('denied listener before unload', listener);
             return;
         }
         return orig_addEventListener(type, listener, options);
-    }
+    },
+    () => function() {}
 );
 
 ///////////////////////////////////
