@@ -103,6 +103,8 @@ function saferPrint(argument, originalFunction) {
         if (typeof argument === 'object' && argument !== null) {
             var props = Object.getOwnPropertyNames(argument);
             for (var i=0; i<props.length; i++) {
+                // yes, we don't do anything with it, we just trigger whatever
+                // getter tricks that might be attempted
                 var dummy = argument[props[i]];
             }
         }
@@ -323,7 +325,7 @@ navigator.clipboard.write = function(content) {
     sleep(500);
     return new Promise(function(resolve, reject) {
         setTimeout(function() {
-            orig_clipboardWrite.call(this, content).then(function() {
+            orig_clipboardWrite.call(context, content).then(function() {
                 resolve();
             });
         }, hourlyRandom() * 250 + 250);// stop tricks with quickly replacing clipboard contents
@@ -428,7 +430,7 @@ function dumpBuf(result) {
 ///////////////
 // Kill crypto
 
-const orig_random = Crypto.prototype.getRandomValues
+//const orig_random = Crypto.prototype.getRandomValues
 var notRandomArrayValue = 0
 Crypto.prototype.getRandomValues = function(arr) {
     for (var i=0; i<arr.length; i++) {
@@ -740,8 +742,8 @@ window.webkitRequestFileSystem = function(type, size, successCallback, errorCall
     orig_log("Requesting filesystem");
     //orig_log(this);
     //orig_log(arguments);
-    const yes = () => orig_log("is in incognito");
-    const no = () => orig_log("is not in incognito");
+    //const yes = () => orig_log("is in incognito");
+    //const no = () => orig_log("is not in incognito");
     //orig_webkitRequestFileSystem(window.TEMPORARY, 100, not, yes);
     orig_webkitRequestFileSystem(type, 100, successCallback, errorCallback);
     //orig_webkitRequestFileSystem(window.TEMPORARY, 100, successCallback, errorCallback);

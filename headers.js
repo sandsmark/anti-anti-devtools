@@ -148,7 +148,7 @@ function draw() {
     for (var i = 0; i < particles.length; i++) {
         var p = particles[i];
         ctx.beginPath();
-        p.opacity = Math.round(p.remaining_life / p.life * 100) / 100
+        p.opacity = Math.round(p.remaining_life / p.life * 100) / 100;
         var gradient = ctx.createRadialGradient(p.location.x, p.location.y, 0, p.location.x, p.location.y, p.radius);
         p.r = 255;
         p.g = 69;
@@ -197,7 +197,7 @@ function updateIcon(tab) {
 
 chrome.tabs.onActivated.addListener(function(tab) {
     updateIcon(tab.tabId);
-})
+});
 
 chrome.browserAction.onClicked.addListener(function(tab) {
     if (disabledIn.has(tab.id)) {
