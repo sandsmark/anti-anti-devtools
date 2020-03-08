@@ -259,7 +259,16 @@ setGetSet(window, 'addEventListener', () => function(type, listener, options) {
         }
         return orig_addEventListener(type, listener, options);
     },
-    () => function() {}
+    () => function() { console.warn("Tried to override addEventListener!"); }
+);
+
+const orig_registerServiceWorker = navigator.serviceWorker.register;
+setGetSet(navigator.serviceWorker, 'register', () => function() {
+        orig_log("Tried to register service worker");
+        orig_log(arguments)
+        //return orig_registerServiceWorker (type, listener, options);
+    },
+    () => function() {orig_log("Tried to set serviceWorker.register!"); }
 );
 
 ///////////////////////////////////
