@@ -576,9 +576,9 @@ Object.defineProperty(HTMLCanvasElement.prototype, 'toDataURL', {
 
 Object.defineProperty(CanvasRenderingContext2D.prototype, 'getImageData', {
     value: function() {
-        ret = orig_getImageData.apply(this, arguments);
-        garbleImage(ret, this.canvas.width, this.canvas.height)
-        return ret
+        var ret = orig_getImageData.apply(this, arguments);
+        garbleImage(ret, this.canvas.width, this.canvas.height);
+        return ret;
     }
 });
 
