@@ -41,13 +41,13 @@ const generatedFpJsVid = randomChars(20);
 
 chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
     var headers = details.requestHeaders;
-    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1);
+    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1); // lgtm [js/incomplete-url-substring-sanitization]
     for(var i = 0, l = headers.length; i < l; ++i) {
         if( headers[i].name == 'User-Agent' ) {
             headers[i].value = userAgent;
         } else if( headers[i].name == 'Accept-Language' ) {
             headers[i].value = 'en-US,en;q=0.8';
-        } else if( headers[i].name == 'Accept' && details.url.indexOf("yahoo.com/") != -1 ) {
+        } else if( headers[i].name == 'Accept' && details.url.indexOf("yahoo.com/") != -1 ) { // lgtm [js/incomplete-url-substring-sanitization]
             headers[i].value = 'accept: application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3';
         } else if( headers[i].name.toLowerCase() == 'cookie') {
             var newHeader = ''

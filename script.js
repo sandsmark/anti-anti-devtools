@@ -24,7 +24,9 @@ if (!enabled) {
     console.warn('anti-devtools disabled in this tab');
     return;
 }
-const isFingerprint = (window.location.hostname.indexOf("fingerprintjs.com") != -1 || window.location.hostname.indexOf("fpjs.io") != -1);
+
+                                                                                                                                           /// we _want_ it to be trigger happy
+const isFingerprint = (window.location.hostname.indexOf("fingerprintjs.com") != -1 || window.location.hostname.indexOf("fpjs.io") != -1); // lgtm [js/incomplete-url-substring-sanitization]
 if (isFingerprint) {
     localStorage.removeItem('_vid');
     delete_cookie('_vid');
@@ -768,7 +770,9 @@ function addStyleString(str) {
     node.innerHTML = str;
     document.body.appendChild(node);
 }
-if (window.location.hostname.indexOf("slideshare.net") != -1) {
+
+                                                                   /// we _want_ it to be trigger happy
+if (window.location.hostname.indexOf("slideshare.net") != -1) { // lgtm [js/incomplete-url-substring-sanitization]
     setTimeout(function() {
         addStyleString(".large-8 { width: 100%; }")
         console.log("fixed slideshare css")
