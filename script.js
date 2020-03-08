@@ -164,7 +164,7 @@ function setGet(obj, propertyName, func) {
     try {
         Object.defineProperty(obj, propertyName, { get: func });
     } catch (exception) {
-        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
+        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
     }
 }
 
@@ -173,7 +173,7 @@ function setSet(obj, propertyName, func) {
     try {
         Object.defineProperty(obj, propertyName, { set: func });
     } catch (exception) {
-        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
+        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
     }
 }
 
@@ -181,13 +181,13 @@ function setGetSet(obj, propertyName, getFunc, setFunc) {
     try {
         Object.defineProperty(obj, propertyName, { set: setFunc, get: getFunc });
     } catch (exception) {
-        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
+        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
     }
 }
 
 
 Object.defineProperty(webkitSpeechRecognition.prototype, 'onresult', {
-        set: function() { console.log("tried to do speech recognition");  }
+        set: function() { orig_log("tried to do speech recognition");  }
     }
 )
 
@@ -270,7 +270,7 @@ window.addEventListener('click', function() { hasInteracted = true; } , true);
 var warnUnload = false;
 window.onbeforeunload = function(e) {
     if (hasInteracted && warnUnload) {
-        console.log('has interacted, allowing warning about unloading page');
+        orig_log('has interacted, allowing warning about unloading page');
         return 'Allow warning';
     }
 }
@@ -363,7 +363,7 @@ try {
         });
     }
 } catch(e) {
-    console.log("Failed to override clipboard writetext: " + e);
+    orig_log("Failed to override clipboard writetext: " + e);
 }
 
 const orig_execCommand = document.execCommand
@@ -387,28 +387,28 @@ document.execCommand = function()
         }
     }
     if (isCopy) {
-        console.log("is copy");
+        orig_log("is copy");
         sleep(Math.random() * 250 + 250);
         const ret = orig_execCommand.apply(this, arguments)
         console.log(ret);
         //return ret;
     }
     if (isCut) {
-        console.log("is cut");
+        orig_log("is cut");
         sleep(Math.random() * 250 + 250);
         const ret = orig_execCommand.apply(this, arguments)
         console.log(ret);
         //return ret;
     }
     if (isPaste) {
-        console.log("is paste");
+        orig_log("is paste");
         //const ret = orig_execCommand.apply(this, arguments)
         return false;
     }
     console.log(arguments); console.log(this);
     const ret = orig_execCommand.apply(this, arguments)
-    console.log("was not clipboard");
-    console.log(ret);
+    orig_log("was not clipboard");
+    orig_log(ret);
     return ret;
 }
 
@@ -438,9 +438,9 @@ function dumpBuf(result) {
         decoded += String.fromCharCode(buf[i])
     }
 
-    console.log(decoded)
+    orig_log(decoded)
     if (!valid) {
-        console.log(result)
+        orig_log(result)
     }
 }
 
@@ -463,7 +463,7 @@ SubtleCrypto.prototype.decrypt = function(algorithm, key, data) {
     return new Promise(function(resolve, reject) {
         orig_decrypt.call(crypt, algorithm, key, data).then(
             function(result) {
-                console.log("decrypted")
+                orig_log("decrypted")
                 dumpBuf(result)
                 resolve(result);
             }
@@ -472,7 +472,7 @@ SubtleCrypto.prototype.decrypt = function(algorithm, key, data) {
 }
 const orig_encrypt = SubtleCrypto.prototype.encrypt
 SubtleCrypto.prototype.encrypt = function(algorithm, key, data) {
-    console.log("encrypting")
+    orig_log("encrypting")
     dumpBuf(data)
     var crypt = this
     return new Promise(function(resolve, reject) {
@@ -488,7 +488,7 @@ SubtleCrypto.prototype.verify = function(algorithm, key, signature, data) {
     console.log("Trying to verify some shit, alg " + algorithm.name + " hash name " + algorithm.hash.name);
     return new Promise(function(resolve, reject) {
         setTimeout(function() {
-            console.log("Of course it's ok, you can trust the client")
+            orig_log("Of course it's ok, you can trust the client")
             resolve(true);
         }, 1000);
     });
@@ -748,14 +748,14 @@ navigator.storage.estimate = function() {
         setTimeout(function() {
             orig_storageEstimate.call(context).then(function(estimate) {
                 estimate.quota = hourlyRandom() * 2500000 + 120000000;
-                console.log(estimate);
+                orig_log(estimate);
                 resolve(estimate);
             });
         }, Math.random() * 250 + 250); // Kill timing attacks
     });
 }
 } catch(e) {
-    console.log("Failed to override storage estimate: " + e)
+    orig_log("Failed to override storage estimate: " + e)
 }
 
 const orig_webkitRequestFileSystem = window.webkitRequestFileSystem;
@@ -783,7 +783,7 @@ window.webkitRequestFileSystem = function(type, size, successCallback, errorCall
 //    //return orig_requestFileSystem(type, size, successCallback, errorCallback);
 //}
 
-console.log("devtools detect stuff overriden")
+orig_log("devtools detect stuff overriden")
 
 function addStyleString(str) {
     var node = document.createElement('style');
@@ -795,7 +795,7 @@ function addStyleString(str) {
 if (window.location.hostname.indexOf("slideshare.net") != -1) { // lgtm [js/incomplete-url-substring-sanitization]
     setTimeout(function() {
         addStyleString(".large-8 { width: 100%; }")
-        console.log("fixed slideshare css")
+        orig_log("fixed slideshare css")
     }, 100);
 }
 
