@@ -86,7 +86,7 @@ function sleep (dur){
     var t0 = performance.now();
     while(performance.now() < t0 + dur){ /* do nothing */ }
 }
-var sleepDuration = 1
+var sleepDuration = 1;
 
 function saferPrint(argument, originalFunction) {
     var t0 = performance.now();
@@ -133,55 +133,55 @@ console.dir = function(argument) { saferPrint(argument, orig_dir); }
 console.clear = function() { }
 
 // Just in case
-window.console.debug = console.debug
-window.console.info = console.info
-window.console.log = console.log
-window.console.warn = console.warn
-window.console.clear = console.clear
-window.console.dir = console.dir
+window.console.debug = console.debug;
+window.console.info = console.info;
+window.console.log = console.log;
+window.console.warn = console.warn;
+window.console.clear = console.clear;
+window.console.dir = console.dir;
 
 
 /////////////////////
 // Defuse a bunch of dumb APIs
-navigator.getBattery = () => undefined
-navigator.getBattery.toString = () => "function getBattery() { [native code] }"
+navigator.getBattery = () => undefined;
+navigator.getBattery.toString = () => "function getBattery() { [native code] }";
 
-window.devicePixelRatio = 1
-window.screen = {}
-window.screen.colorDepth = 24
-navigator.doNotTrack = undefined
+window.devicePixelRatio = 1;
+window.screen = {};
+window.screen.colorDepth = 24;
+navigator.doNotTrack = undefined;
 
 
 /////////////////////
 // Audio stuff is used for fingerprinting, just disable the whole thing
-window.OfflineAudioContext = undefined
-window.AudioContext = undefined
+window.OfflineAudioContext = undefined;
+window.AudioContext = undefined;
 
 
 /////////////////////
 // Anonymize a bunch of properties
 function setGet(obj, propertyName, func) {
     try {
-        Object.defineProperty(obj, propertyName, { get: func })
+        Object.defineProperty(obj, propertyName, { get: func });
     } catch (exception) {
-        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception)
+        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
     }
 }
 
 // Disable overriding
 function setSet(obj, propertyName, func) {
     try {
-        Object.defineProperty(obj, propertyName, { set: func })
+        Object.defineProperty(obj, propertyName, { set: func });
     } catch (exception) {
-        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception)
+        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
     }
 }
 
 function setGetSet(obj, propertyName, getFunc, setFunc) {
     try {
-        Object.defineProperty(obj, propertyName, { set: setFunc, get: getFunc })
+        Object.defineProperty(obj, propertyName, { set: setFunc, get: getFunc });
     } catch (exception) {
-        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception)
+        console.log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
     }
 }
 
@@ -193,9 +193,9 @@ Object.defineProperty(webkitSpeechRecognition.prototype, 'onresult', {
 
 function setVal(obj, propertyName, func) {
     try {
-        Object.defineProperty(obj, propertyName, { value: func })
+        Object.defineProperty(obj, propertyName, { value: func });
     } catch (exception) {
-        console.log("Failed to override value: " + exception)
+        console.log("Failed to override value: " + exception);
     }
 }
 
@@ -208,13 +208,13 @@ navigator.sendBeacon.toString = () => "function sendBeacon() { [native code] }";
 // Generally dumb shit
 
 function setProp(obj, propertyName, val) {
-    setGet(obj, propertyName, () => val)
+    setGet(obj, propertyName, () => val);
 }
 
-setProp(NetworkInformation.prototype, 'downlink',  1000)
-setProp(NetworkInformation.prototype, 'effectiveType',  '4g')
-setProp(NetworkInformation.prototype, 'rtt',  0)
-setProp(NetworkInformation.prototype, 'saveData',  true)
+setProp(NetworkInformation.prototype, 'downlink',  1000);
+setProp(NetworkInformation.prototype, 'effectiveType',  '4g');
+setProp(NetworkInformation.prototype, 'rtt',  0);
+setProp(NetworkInformation.prototype, 'saveData',  true);
 
 setProp(navigator.credentials, 'get', function() {
     return new Promise(function(resolve, reject) {
@@ -224,16 +224,16 @@ setProp(navigator.credentials, 'get', function() {
     });
 })
 
-setProp(navigator, 'hardwareConcurrency', 1)
+setProp(navigator, 'hardwareConcurrency', 1);
 
-setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36')
-setProp(navigator, 'languages', ['en-US', 'en'])
-setProp(navigator, 'platform', 'Win64')
-setProp(document, 'referrer', location.protocol + '://' + location.hostname)
-setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36')
+setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36');
+setProp(navigator, 'languages', ['en-US', 'en']);
+setProp(navigator, 'platform', 'Win64');
+setProp(document, 'referrer', location.protocol + '://' + location.hostname);
+setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36');
 
-setProp(UserActivation.prototype, 'isActive', false)
-setProp(UserActivation.prototype, 'hasBeenActive', false)
+setProp(UserActivation.prototype, 'isActive', false);
+setProp(UserActivation.prototype, 'hasBeenActive', false);
 
 
 /////////////////////
@@ -248,7 +248,7 @@ try {
         });
     }
 } catch(e) {
-    console.log("Failed to override keyboard locking: " + e)
+    console.log("Failed to override keyboard locking: " + e);
 }
 
 const orig_addEventListener = window.addEventListener;
@@ -536,14 +536,14 @@ const orig_getImageData = CanvasRenderingContext2D.prototype.getImageData;
 var canvasContentBackup
 
 function garbleCanvas(canvas) {
-    const {width, height} = canvas
-    const context = canvas.getContext('2d')
-    const image = orig_getImageData.call(context, 0, 0, width, height)
+    const {width, height} = canvas;
+    const context = canvas.getContext('2d');
+    const image = orig_getImageData.call(context, 0, 0, width, height);
 
     // not sure if we need to do this, or if we can reuse the image,
     // but javascript is slow crap anyways so fuck performance
-    canvasContentBackup = orig_getImageData.call(context, 0, 0, width, height)
-    garbleImage(image, width, height)
+    canvasContentBackup = orig_getImageData.call(context, 0, 0, width, height);
+    garbleImage(image, width, height);
 
     context.putImageData(image, 0, 0);
 }
@@ -551,26 +551,26 @@ function garbleCanvas(canvas) {
 function ungarbleCanvas(canvas) {
     const context = canvas.getContext('2d');
     context.putImageData(canvasContentBackup, 0, 0);
-    canvasContentBackup = undefined
+    canvasContentBackup = undefined;
 }
 
 const orig_toBlob = HTMLCanvasElement.prototype.toBlob;
 Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
     value: function() {
-        garbleCanvas(this)
-        const ret = orig_toBlob.apply(this, arguments)
-        ungarbleCanvas(this)
-        return ret
+        garbleCanvas(this);
+        const ret = orig_toBlob.apply(this, arguments);
+        ungarbleCanvas(this);
+        return ret;
     }
 });
 
 const orig_toDataURL = HTMLCanvasElement.prototype.toDataURL;
 Object.defineProperty(HTMLCanvasElement.prototype, 'toDataURL', {
     value: function() {
-        garbleCanvas(this)
+        garbleCanvas(this);
         const ret = orig_toDataURL.apply(this, arguments);
-        ungarbleCanvas(this)
-        return ret
+        ungarbleCanvas(this);
+        return ret;
     }
 });
 
@@ -585,21 +585,21 @@ Object.defineProperty(CanvasRenderingContext2D.prototype, 'getImageData', {
 
 /////////////////////
 // fucking webgl is hard to get rid of
-delete window.WebGLActiveInfo
-delete window.WebGLBuffer
-delete window.WebGLContextEvent
-delete window.WebGLFramebuffer
-delete window.WebGLProgram
-delete window.WebGLQuery
-delete window.WebGLRenderbuffer
-delete window.WebGLSampler
-delete window.WebGLShader
-delete window.WebGLShaderPrecisionFormat
-delete window.WebGLSync
-delete window.WebGLTexture
-delete window.WebGLTransformFeedback
-delete window.WebGLUniformLocation
-delete window.WebGLVertexArrayObject
+delete window.WebGLActiveInfo;
+delete window.WebGLBuffer;
+delete window.WebGLContextEvent;
+delete window.WebGLFramebuffer;
+delete window.WebGLProgram;
+delete window.WebGLQuery;
+delete window.WebGLRenderbuffer;
+delete window.WebGLSampler;
+delete window.WebGLShader;
+delete window.WebGLShaderPrecisionFormat;
+delete window.WebGLSync;
+delete window.WebGLTexture;
+delete window.WebGLTransformFeedback;
+delete window.WebGLUniformLocation;
+delete window.WebGLVertexArrayObject;
 
 const glVendors = [
     'Microsoft',
@@ -671,7 +671,7 @@ const glRenderers = {
         'AMD Radeon Pro 460 OpenGL Engine',
         'AMD Radeon R9 M370X OpenGL Engine',
     ]
-}
+};
 
 const glVendor = glVendors[Math.floor(hourlyRandom() * glVendors.length)]
 const glRenderer = glRenderers[glVendor][Math.floor(hourlyRandom() * glRenderers[glVendor].length)]
@@ -682,10 +682,10 @@ Object.defineProperty(WebGL2RenderingContext.prototype, 'getParameter', {
     value: function(name) {
         const debugInfo = orig_gl2GetGetExtension.call(this, 'WEBGL_debug_renderer_info');
         if (name == debugInfo.UNMASKED_VENDOR_WEBGL) {
-            return glVendor
+            return glVendor;
         }
         if (name == debugInfo.UNMASKED_RENDERER_WEBGL) {
-            return glRenderer
+            return glRenderer;
         }
         return orig_gl2GetParameter.apply(this, arguments);
     }
@@ -705,10 +705,10 @@ Object.defineProperty(WebGLRenderingContext.prototype, 'getParameter', {
     value: function(name) {
         const debugInfo = orig_glGetGetExtension.call(this, 'WEBGL_debug_renderer_info');
         if (name == debugInfo.UNMASKED_VENDOR_WEBGL) {
-            return glVendor
+            return glVendor;
         }
         if (name == debugInfo.UNMASKED_RENDERER_WEBGL) {
-            return glRenderer
+            return glRenderer;
         }
         return orig_glGetParameter.apply(this, arguments);
     }
