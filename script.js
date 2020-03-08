@@ -290,64 +290,80 @@ setSet(window, 'onbeforeunload', function(callback) {
 
 // TODO: return promise that sends request to background script
 // which shows a popup for each request.
-const orig_clipboardRead = navigator.clipboard.read;
-navigator.clipboard.read = function() {
-    console.log("Clipboard read");
-    console.log(this);
-    console.log(arguments);
-    orig_clipboardRead.apply(this, arguments);
+try {
+    const orig_clipboardRead = navigator.clipboard.read;
+    navigator.clipboard.read = function() {
+        console.log("Clipboard read");
+        console.log(this);
+        console.log(arguments);
+        orig_clipboardRead.apply(this, arguments);
 
-    //return new Promise() {
-    //    setTimeout(function() {
-    //        resolve('foo');
-    //    }, 300);
-    //}
+        //return new Promise() {
+        //    setTimeout(function() {
+        //        resolve('foo');
+        //    }, 300);
+        //}
+    }
+} catch(e) {
+    console.log("Failed to override clipboard read: " + e);
 }
 
-const orig_clipboardReadText = navigator.clipboard.readText;
-navigator.clipboard.readText = function() {
-    console.log("Clipboard read text");
-    console.log(this);
-    console.log(arguments);
-    orig_clipboardReadText.apply(this, arguments);
+try {
+    const orig_clipboardReadText = navigator.clipboard.readText;
+    navigator.clipboard.readText = function() {
+        console.log("Clipboard read text");
+        console.log(this);
+        console.log(arguments);
+        orig_clipboardReadText.apply(this, arguments);
 
-    //return new Promise() {
-    //    setTimeout(function() {
-    //        resolve('foo');
-    //    }, 300);
-    //}
+        //return new Promise() {
+        //    setTimeout(function() {
+        //        resolve('foo');
+        //    }, 300);
+        //}
+    }
+} catch(e) {
+    console.log("Failed to override clipboard readtext: " + e);
 }
 
-const orig_clipboardWrite = navigator.clipboard.write;
-navigator.clipboard.write = function(content) {
-    console.log("Clipboard write");
-    console.log(this);
-    console.log(arguments);
-    const context = this;
-    sleep(500);
-    return new Promise(function(resolve, reject) {
-        setTimeout(function() {
-            orig_clipboardWrite.call(context, content).then(function() {
-                resolve();
-            });
-        }, hourlyRandom() * 250 + 250);// stop tricks with quickly replacing clipboard contents
-    });
+try {
+    const orig_clipboardWrite = navigator.clipboard.write;
+    navigator.clipboard.write = function(content) {
+        console.log("Clipboard write");
+        console.log(this);
+        console.log(arguments);
+        const context = this;
+        sleep(500);
+        return new Promise(function(resolve, reject) {
+            setTimeout(function() {
+                orig_clipboardWrite.call(context, content).then(function() {
+                    resolve();
+                });
+            }, hourlyRandom() * 250 + 250);// stop tricks with quickly replacing clipboard contents
+        });
+    }
+} catch(e) {
+    console.log("Failed to override clipboard write: " + e);
 }
 
-const orig_clipboardWriteText = navigator.clipboard.writeText;
-navigator.clipboard.writeText = function(text) {
-    console.log("Clipboard write text");
-    console.log(this);
-    console.log(arguments);
-    sleep(500);
-    const context = this;
-    return new Promise(function(resolve, reject) {
-        setTimeout(function() {
-            orig_clipboardWriteText.call(context, text).then(function() {
-                resolve();
-            });
-        }, Math.random() * 250 + 250);// stop tricks with quickly replacing clipboard contents, this will make sure they are replaced in the wrong order (probably), or at least delayed
-    });
+try {
+    const orig_clipboardWriteText = navigator.clipboard.writeText;
+    navigator.clipboard.writeText = function(text) {
+        console.log("Clipboard write text");
+        console.log(this);
+        console.log(arguments);
+        sleep(500);
+        const context = this;
+        return new Promise(function(resolve, reject) {
+            setTimeout(function() {
+                orig_clipboardWriteText.call(context, text).then(function() {
+                    resolve();
+                });
+            }, Math.random() * 250 + 250);// stop tricks with quickly replacing clipboard contents, this will make sure they are replaced in the wrong order (probably), or at least delayed
+        });
+    }
+} catch(e) {
+    console.log("Failed to override clipboard writetext: " + e);
 }
 
 const orig_execCommand = document.execCommand
@@ -724,6 +740,7 @@ Object.defineProperty(WebGLRenderingContext.prototype, 'getParameter', {
 
 ///////////////////////////////
 // Kill detection of incognito
+try {
 const orig_storageEstimate = navigator.storage.estimate;
 navigator.storage.estimate = function() {
     const context = this;
@@ -736,6 +753,9 @@ navigator.storage.estimate = function() {
             });
         }, Math.random() * 250 + 250); // Kill timing attacks
     });
+}
+} catch(e) {
+    console.log("Failed to override storage estimate: " + e)
 }
 
 const orig_webkitRequestFileSystem = window.webkitRequestFileSystem;
