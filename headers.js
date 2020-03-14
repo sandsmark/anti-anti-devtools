@@ -48,7 +48,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
         } else if( headers[i].name == 'Accept-Language' ) {
             headers[i].value = 'en-US,en;q=0.8';
         } else if( headers[i].name == 'Accept' && details.url.indexOf("yahoo.com/") != -1 ) { // lgtm [js/incomplete-url-substring-sanitization]
-            headers[i].value = 'accept: application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3';
+            headers[i].value = 'application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3';
         } else if( headers[i].name.toLowerCase() == 'cookie') {
             var newHeader = ''
             const cookies = headers[i].value.split(';')
