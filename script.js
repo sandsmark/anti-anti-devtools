@@ -107,7 +107,7 @@ function saferPrint(argument, originalFunction) {
             for (var i=0; i<props.length; i++) {
                 // yes, we don't do anything with it, we just trigger whatever
                 // getter tricks that might be attempted
-                var dummy = argument[props[i]];
+                var dummy = argument[props[i]]; // lgtm [js/unused-local-variable]
             }
         }
 
@@ -191,14 +191,6 @@ Object.defineProperty(webkitSpeechRecognition.prototype, 'onresult', {
     }
 )
 
-function setVal(obj, propertyName, func) {
-    try {
-        Object.defineProperty(obj, propertyName, { value: func });
-    } catch (exception) {
-        console.log("Failed to override value: " + exception);
-    }
-}
-
 /////////////////////
 // Beacons are dumb
 navigator.sendBeacon = function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; }
@@ -262,7 +254,7 @@ setGetSet(window, 'addEventListener', () => function(type, listener, options) {
     () => function() { console.warn("Tried to override addEventListener!"); }
 );
 
-const orig_registerServiceWorker = navigator.serviceWorker.register;
+//const orig_registerServiceWorker = navigator.serviceWorker.register;
 setGetSet(navigator.serviceWorker, 'register', () => function() {
         orig_log("Tried to register service worker");
         orig_log(arguments)
