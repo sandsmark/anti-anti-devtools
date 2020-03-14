@@ -257,7 +257,7 @@ setGetSet(window, 'addEventListener', () => function(type, listener, options) {
 //const orig_registerServiceWorker = navigator.serviceWorker.register;
 setGetSet(navigator.serviceWorker, 'register', () => function() {
         orig_log("Tried to register service worker");
-        orig_log(arguments)
+        console.log(arguments)
         //return orig_registerServiceWorker (type, listener, options);
     },
     () => function() {orig_log("Tried to set serviceWorker.register!"); }
@@ -364,7 +364,7 @@ try {
         });
     }
 } catch(e) {
-    orig_log("Failed to override clipboard writetext: " + e);
+    console.log("Failed to override clipboard writetext: " + e);
 }
 
 const orig_execCommand = document.execCommand
@@ -409,7 +409,7 @@ document.execCommand = function()
     console.log(arguments); console.log(this);
     const ret = orig_execCommand.apply(this, arguments)
     orig_log("was not clipboard");
-    orig_log(ret);
+    console.log(ret);
     return ret;
 }
 
@@ -439,9 +439,9 @@ function dumpBuf(result) {
         decoded += String.fromCharCode(buf[i])
     }
 
-    orig_log(decoded)
+    console.log(decoded)
     if (!valid) {
-        orig_log(result)
+        console.log(result)
     }
 }
 
@@ -749,14 +749,14 @@ navigator.storage.estimate = function() {
         setTimeout(function() {
             orig_storageEstimate.call(context).then(function(estimate) {
                 estimate.quota = hourlyRandom() * 2500000 + 120000000;
-                orig_log(estimate);
+                console.log(estimate);
                 resolve(estimate);
             });
         }, Math.random() * 250 + 250); // Kill timing attacks
     });
 }
 } catch(e) {
-    orig_log("Failed to override storage estimate: " + e)
+    console.log("Failed to override storage estimate: " + e)
 }
 
 const orig_webkitRequestFileSystem = window.webkitRequestFileSystem;
