@@ -800,6 +800,25 @@ if (window.location.hostname.indexOf("slideshare.net") != -1) { // lgtm [js/inco
     }, 100);
 }
 
+if (window.location.hostname.indexOf("slack.com") != -1) { // lgtm [js/incomplete-url-substring-sanitization]
+    var observer = new MutationObserver(function(mutationList) {
+        for (var mutation of mutationList) {
+            for (var child of mutation.addedNodes) {
+                if (!child.className) {
+                    continue;
+                }
+                if (child.className === 'p-client p-client--ia-top-nav') {
+                    child.style.gridTemplateRows = '0px auto min-content';
+                    orig_log("fixed slack topbar")
+
+                    observer.disconnect();
+                }
+            }
+        }
+    });
+    observer.observe(document, {childList: true, subtree: true});
+}
+
 ////////////////////////////////////////////
 ////////////////////////// end actual script
 ////////////////////////////////////////////
