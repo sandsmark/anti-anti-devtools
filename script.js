@@ -208,13 +208,17 @@ setProp(NetworkInformation.prototype, 'effectiveType',  '4g');
 setProp(NetworkInformation.prototype, 'rtt',  0);
 setProp(NetworkInformation.prototype, 'saveData',  true);
 
-setProp(navigator.credentials, 'get', function() {
-    return new Promise(function(resolve, reject) {
-        setTimeout(function() {
-            reject();
-        }, 300);
+if (navigator.credentials) {
+    setProp(navigator.credentials, 'get', function() {
+        return new Promise(function(resolve, reject) {
+            setTimeout(function() {
+                reject();
+            }, 300);
+        });
     });
-})
+} else {
+    orig_log("Credentials not available for site");
+}
 
 setProp(navigator, 'hardwareConcurrency', 1);
 
