@@ -31,7 +31,7 @@ function randomChars(len) {
     var chars = '';
 
     while (chars.length < len) {
-        chars += hourlyRandom().toString(36).substring(2);
+        chars += Math.random().toString(36).substring(2);
     }
 
     // Remove unnecessary additional characters.
@@ -84,7 +84,7 @@ let disabledIn = new Set();
 chrome.webRequest.onHeadersReceived.addListener(function(details) {
     var headers = details.responseHeaders;
 
-    const enabled = disabledIn.has(details.tabId) ? 'nofuck' : 'dofuck'; 
+    const enabled = disabledIn.has(details.tabId) ? 'nofuck' : 'dofuck' + details.tabId;
 
     for(var i = 0, l = headers.length; i < l; ++i) {
         if (headers[i].name.toLowerCase() != 'set-cookie') {

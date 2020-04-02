@@ -17,7 +17,8 @@ function delete_cookie( name ) {
 
 const fuckingsCookieName = 'Fuckings-To-The-Internet';
 
-const enabled = getCookie(fuckingsCookieName) !== 'nofuck';
+const fuckingsSeed = getCookie(fuckingsCookieName);
+const enabled = fuckingsSeed !== 'nofuck';
 delete_cookie(fuckingsCookieName);
 
 if (!enabled) {
@@ -57,7 +58,7 @@ const date = new Date();
 // Decided against using the window.location because some inject code
 // to run in about:blank (or another host and get the value back),
 // which would make this moot
-const hourlySeed = simpleHash((isFingerprint ? Math.random() : '') + date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString());
+const hourlySeed = simpleHash((isFingerprint ? Math.random() : '') + date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString() + fuckingsSeed);
 var hourlyRandom = LCG(hourlySeed);
 
 
@@ -410,7 +411,7 @@ try {
                 orig_clipboardWriteText.call(context, text).then(function() {
                     resolve();
                 });
-            }, Math.random() * 250 + 250);// stop tricks with quickly replacing clipboard contents, this will make sure they are replaced in the wrong order (probably), or at least delayed
+            }, hourlyRandom() * 250 + 250);// stop tricks with quickly replacing clipboard contents, this will make sure they are replaced in the wrong order (probably), or at least delayed
         });
     }
 } catch(e) {
@@ -439,14 +440,14 @@ document.execCommand = function()
     }
     if (isCopy) {
         orig_log("is copy");
-        sleep(Math.random() * 250 + 250);
+        sleep(hourlyRandom() * 250 + 250);
         const ret = orig_execCommand.apply(this, arguments)
         console.log(ret);
         //return ret;
     }
     if (isCut) {
         orig_log("is cut");
-        sleep(Math.random() * 250 + 250);
+        sleep(hourlyRandom() * 250 + 250);
         const ret = orig_execCommand.apply(this, arguments)
         console.log(ret);
         //return ret;
@@ -802,7 +803,7 @@ navigator.storage.estimate = function() {
                 console.log(estimate);
                 resolve(estimate);
             });
-        }, Math.random() * 250 + 250); // Kill timing attacks
+        }, hourlyRandom() * 250 + 250); // Kill timing attacks
     });
 }
 } catch(e) {
