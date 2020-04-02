@@ -155,8 +155,51 @@ navigator.doNotTrack = undefined;
 /////////////////////
 // Audio stuff is used for fingerprinting, just disable the whole thing
 window.OfflineAudioContext = undefined;
-window.AudioContext = undefined;
+setProp(AudioContext.prototype, 'baseLatency', 0);
+setProp(AudioContext.prototype, 'outputLatency', 0);
 
+const orig_getFloatFrequencyData = AnalyserNode.prototype.getFloatFrequencyData;
+var hourlyGFDRandom = LCG(hourlySeed);
+AnalyserNode.prototype.getFloatFrequencyData = function() {
+    var ret = orig_getFloatFrequencyData.apply(this, arguments)
+    for (let i = 0; i < arguments[0].length; i++) {
+        arguments[0][i] *= hourlyGFDRandom()/10 + 0.9;
+    }
+    return ret;
+}
+
+const orig_getByteFrequencyData = AnalyserNode.prototype.getByteFrequencyData;
+var hourlyGBDRandom = LCG(hourlySeed);
+AnalyserNode.prototype.getByteFrequencyData = function() {
+    var ret = orig_getByteFrequencyData.apply(this, arguments)
+    for (let i = 0; i < arguments[0].length; i++) {
+        arguments[0][i] *= hourlyGBDRandom() / 10 + 0.9;
+    }
+    return ret;
+}
+
+const orig_getFloatTimeDomainData = AnalyserNode.prototype.getFloatTimeDomainData;
+var hourlyGFTDDRandom = LCG(hourlySeed);
+AnalyserNode.prototype.getFloatTimeDomainData = function() {
+    var ret = orig_getFloatTimeDomainData.apply(this, arguments)
+    for (let i = 0; i < arguments[0].length; i++) {
+        arguments[0][i] *= hourlyGFTDDRandom()/10 + 0.9;
+    }
+    return ret;
+}
+
+const orig_getByteTimeDomainData = AnalyserNode.prototype.getByteTimeDomainData;
+var hourlyGBTDDRandom = LCG(hourlySeed);
+AnalyserNode.prototype.getByteTimeDomainData = function() {
+    var ret = orig_getByteTimeDomainData.apply(this, arguments)
+    if (!ret) {
+        return ret;
+    }
+    for (let i = 0; i < arguments[0].length; i++) {
+        arguments[0][i] *= hourlyGBTDDRandom()/10 + 0.9;
+    }
+    return ret;
+}
 
 /////////////////////
 // Anonymize a bunch of properties
@@ -207,6 +250,8 @@ setProp(NetworkInformation.prototype, 'downlink',  1000);
 setProp(NetworkInformation.prototype, 'effectiveType',  '4g');
 setProp(NetworkInformation.prototype, 'rtt',  0);
 setProp(NetworkInformation.prototype, 'saveData',  true);
+
+setProp(NetworkInformation.prototype, 'downlink',  1000);
 
 if (navigator.credentials) {
     setProp(navigator.credentials, 'get', function() {
