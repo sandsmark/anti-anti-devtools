@@ -262,6 +262,7 @@ setGetSet(window, 'addEventListener', () => function(type, listener, options) {
 setGetSet(navigator.serviceWorker, 'register', () => function() {
         orig_log("Tried to register service worker");
         console.log(arguments)
+        return new Promise(function(resolve, reject) { });
         //return orig_registerServiceWorker (type, listener, options);
     },
     () => function() {orig_log("Tried to set serviceWorker.register!"); }
