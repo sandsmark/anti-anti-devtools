@@ -552,6 +552,8 @@ SubtleCrypto.prototype.verify = function(algorithm, key, signature, data) {
 const orig_innerWidth = Object.getOwnPropertyDescriptor(window, 'innerWidth')['get']
 const orig_innerHeight = Object.getOwnPropertyDescriptor(window, 'innerHeight')['get']
 
+
+// Fun fact: this breaks youtube's save button (it doesn't handle floating point window sizes)
 const innerWidthRandomness = hourlyRandom()
 const innerHeightRandomness = hourlyRandom()
 setGet(window, "innerWidth", function () { return orig_innerWidth() + innerWidthRandomness; });
