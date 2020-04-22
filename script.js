@@ -144,8 +144,7 @@ window.console.dir = console.dir;
 
 /////////////////////
 // Defuse a bunch of dumb APIs
-navigator.getBattery = () => undefined;
-navigator.getBattery.toString = () => "function getBattery() { [native code] }";
+Navigator.prototype.getBattery = () => {};
 
 window.devicePixelRatio = 1;
 window.screen = {};
