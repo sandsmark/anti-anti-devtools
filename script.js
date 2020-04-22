@@ -237,8 +237,23 @@ Object.defineProperty(webkitSpeechRecognition.prototype, 'onresult', {
 
 /////////////////////
 // Beacons are dumb
-navigator.sendBeacon = function(url, data) { console.log("Intercepted beacon to '" + url + "' with data '" + data + "'"); return true; }
-navigator.sendBeacon.toString = () => "function sendBeacon() { [native code] }";
+const orig_sendBeacon = Navigator.prototype.sendBeacon;
+Navigator.prototype.sendBeacon = function(url, data) {
+    console.log("Intercepted beacon to '" + url + "' with data '" + data + "'");
+
+    // Generate and send completely random bytes as a string
+    // not the most efficient, but lol
+    var gurba = '';
+    for (var i=0; i<4096; i++) {
+        gurba += String.fromCharCode(Math.random() * 255);
+    }
+
+    orig_sendBeacon.call(this, url, gurba);
+
+    return true;
+}
+//    return true;
+navigator.sendBeacon.toString = () => "sendBeacon() { [native code] }";
 
 ////////////////////
 // Generally dumb shit
