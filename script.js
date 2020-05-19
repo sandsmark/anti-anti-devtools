@@ -437,7 +437,7 @@ try {
 }
 
 const orig_execCommand = document.execCommand
-document.execCommand = function()
+setProp(document.execCommand, function()
 {
     var isCopy = false;
     var isCut = false;
@@ -480,7 +480,7 @@ document.execCommand = function()
     orig_log("was not clipboard");
     console.log(ret);
     return ret;
-}
+});
 
 
 //////////////////////////
