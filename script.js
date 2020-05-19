@@ -287,7 +287,7 @@ if (navigator.credentials) {
 setProp(navigator, 'hardwareConcurrency', 1);
 
 setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36');
-setProp(navigator, 'languages', ['en-US', 'en']);
+setProp(navigator, 'languages', ['en-US', 'en-GB', 'en']);
 setProp(navigator, 'platform', 'Win64');
 setProp(document, 'referrer', location.protocol + '://' + location.hostname);
 setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36');
