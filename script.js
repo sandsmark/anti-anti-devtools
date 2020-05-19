@@ -142,6 +142,39 @@ window.console.clear = console.clear;
 window.console.dir = console.dir;
 
 
+// Helper functions to override properties
+
+function setGet(obj, propertyName, func) {
+    try {
+        Object.defineProperty(obj, propertyName, { get: func });
+    } catch (exception) {
+        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
+    }
+}
+
+// Disable overriding
+function setSet(obj, propertyName, func) {
+    try {
+        Object.defineProperty(obj, propertyName, { set: func });
+    } catch (exception) {
+        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
+    }
+}
+
+function setGetSet(obj, propertyName, getFunc, setFunc) {
+    try {
+        Object.defineProperty(obj, propertyName, { set: setFunc, get: getFunc });
+    } catch (exception) {
+        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
+    }
+}
+
+function setProp(obj, propertyName, val) {
+    setGet(obj, propertyName, () => val);
+}
+
+
+
 /////////////////////
 // Defuse a bunch of dumb APIs
 Navigator.prototype.getBattery = () => {};
@@ -201,38 +234,13 @@ AnalyserNode.prototype.getByteTimeDomainData = function() {
     return ret;
 }
 
-/////////////////////
-// Anonymize a bunch of properties
-function setGet(obj, propertyName, func) {
-    try {
-        Object.defineProperty(obj, propertyName, { get: func });
-    } catch (exception) {
-        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
-    }
-}
-
-// Disable overriding
-function setSet(obj, propertyName, func) {
-    try {
-        Object.defineProperty(obj, propertyName, { set: func });
-    } catch (exception) {
-        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
-    }
-}
-
-function setGetSet(obj, propertyName, getFunc, setFunc) {
-    try {
-        Object.defineProperty(obj, propertyName, { set: setFunc, get: getFunc });
-    } catch (exception) {
-        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
-    }
-}
-
-
 Object.defineProperty(webkitSpeechRecognition.prototype, 'onresult', {
         set: function() { orig_log("tried to do speech recognition");  }
     }
 )
+
+/////////////////////
+// Anonymize a bunch of properties
 
 /////////////////////
 // Beacons are dumb
@@ -256,10 +264,6 @@ navigator.sendBeacon.toString = () => "sendBeacon() { [native code] }";
 
 ////////////////////
 // Generally dumb shit
-
-function setProp(obj, propertyName, val) {
-    setGet(obj, propertyName, () => val);
-}
 
 setProp(NetworkInformation.prototype, 'downlink',  1000);
 setProp(NetworkInformation.prototype, 'effectiveType',  '4g');
@@ -490,6 +494,10 @@ Intl.DateTimeFormat.prototype.resolvedOptions = function() {
 }
 Date.prototype.getTimezoneOffset = function() { return 0; }
 
+
+///////////////
+// Kill crypto
+
 function dumpBuf(result) {
     var buf = new Int8Array(result)
     var decoded = ""
@@ -509,10 +517,6 @@ function dumpBuf(result) {
         console.log(result)
     }
 }
-
-
-///////////////
-// Kill crypto
 
 //const orig_random = Crypto.prototype.getRandomValues
 var notRandomArrayValue = 0
