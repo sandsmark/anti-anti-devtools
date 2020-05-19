@@ -338,14 +338,14 @@ var hasInteracted = false;
 window.addEventListener('click', function() { hasInteracted = true; } , true);
 
 var warnUnload = false;
-window.onbeforeunload = function(e) {
+Window.prototype.onBeforeUnload = function(e) {
     if (hasInteracted && warnUnload) {
         orig_log('has interacted, allowing warning about unloading page');
         return 'Allow warning';
     }
-}
+};
 
-setSet(window, 'onbeforeunload', function(callback) {
+setSet(Window.prototype, onBeforeUnload, function(callback) {
     const result = callback();
     if (result && result != "") {
         console.log(callback);
