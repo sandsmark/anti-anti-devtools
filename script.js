@@ -12,7 +12,12 @@ function getCookie(cookie) { // https://stackoverflow.com/a/19971550/934239
 }
 
 function delete_cookie( name ) {
-    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; domain=' + location.host + ";";
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; domain=' + location.host + "; path=/";
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=' + location.pathname + '; domain=' + location.host + ";";
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=' + location.pathname + ";";
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
 }
 
 const fuckingsCookieName = 'Fuckings-To-The-Internet';
