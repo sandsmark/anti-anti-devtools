@@ -3,6 +3,8 @@
        // Hurr durr javascript
 '(' + function() {
 
+const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36';
+
 /// Only way to communicate between the background script and content script apparently
 function getCookie(cookie) { // https://stackoverflow.com/a/19971550/934239
   return document.cookie.split(';').reduce(function(prev, c) {
@@ -291,11 +293,11 @@ if (navigator.credentials) {
 
 setProp(navigator, 'hardwareConcurrency', 1);
 
-setProp(navigator, 'userAgent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36');
+setProp(navigator, 'userAgent', userAgent);
 setProp(navigator, 'languages', ['en-US', 'en-GB', 'en']);
 setProp(navigator, 'platform', 'Win64');
 setProp(document, 'referrer', location.protocol + '://' + location.hostname);
-setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36');
+setProp(navigator, 'appVersion', '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36');
 
 setProp(UserActivation.prototype, 'isActive', false);
 setProp(UserActivation.prototype, 'hasBeenActive', false);
