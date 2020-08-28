@@ -52,25 +52,19 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
         } else if( headers[i].name.toLowerCase() == 'cookie') {
             var newHeader = ''
             const cookies = headers[i].value.split(';')
-            var replacedCookie = false;
 
             for (var cookie in cookies) {
                 var cookieName = cookies[cookie].split('=')[0].trim()
                 if (isFingerprint && cookieName == '_vid') {
                     newHeader += `_vid=` + generatedFpJsVid + `; Max-Age=0;`
                     console.log("replaced vid, old " + cookies[cookie].split('=')[1].trim() + ", new " + generatedFpJsVid);
-                    replacedCookie = true;
                 } else if (cookieName == fuckingsCookieName) {
-                    console.log("Skipping internal");
-                    replacedCookie = true;
                     continue;
                 } else if (!isFingerprint) {
                     newHeader += cookies[cookie] + ';';
                 }
             }
-            if (replacedCookie) {
-                headers[i].value = newHeader;
-            }
+            headers[i].value = newHeader;
         }
     }
 
@@ -84,23 +78,48 @@ let disabledIn = new Set();
 chrome.webRequest.onHeadersReceived.addListener(function(details) {
     var headers = details.responseHeaders;
 
-    const enabled = disabledIn.has(details.tabId) ? 'nofuck' : 'dofuck' + details.tabId;
+    const enabled = (disabledIn.has(details.tabId) || details.tabId === -1) ? 'nofuck' : 'dofuck' + details.tabId;
+    if (details.tabId === -1) {
+        console.log(details);
+    }
 
+    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1); // lgtm [js/incomplete-url-substring-sanitization]
+
+    var hadCookies = false;
     for(var i = 0, l = headers.length; i < l; ++i) {
         if (headers[i].name.toLowerCase() != 'set-cookie') {
             continue
         }
 
-        var cookieName = headers[i].value.split('=')[0]
-        if (cookieName.toLowerCase() == '_vid') {
-            headers[i].value = `_vid=foo; Max-Age=0;`
-            continue;
+        hadCookies = true;
+
+        var newHeader = ''
+        newHeader += `Fuckings-To-The-Internet=${enabled}; Max-Age=0;`
+        const cookies = headers[i].value.split(';')
+
+        var alreadyHad = false;
+        for (var cookie in cookies) {
+            var cookieName = cookies[cookie].split('=')[0].trim()
+            if (isFingerprint && cookieName == '_vid') {
+                newHeader += `_vid=` + generatedFpJsVid + `; Max-Age=0;`
+                console.log("replaced vid, old " + cookies[cookie].split('=')[1].trim() + ", new " + generatedFpJsVid);
+            } else if (cookieName == fuckingsCookieName) {
+                continue;
+            } else if (!isFingerprint) {
+                newHeader += cookies[cookie] + ';';
+            }
         }
+
+        headers[i].value = newHeader;
     }
-    headers.push({
-        name: "set-cookie",
-        value: `Fuckings-To-The-Internet=${enabled};`
-    });
+
+    if (!hadCookies) {
+        headers.push({
+            name: "set-cookie",
+            value: `Fuckings-To-The-Internet=${enabled};`
+        });
+    }
+    details.responseHeaders = headers
     return {responseHeaders: headers};
 }, requestFilter, ['responseHeaders', 'blocking', 'extraHeaders']);
 
