@@ -15,14 +15,12 @@
       "match_about_blank": true,
       "run_at": "document_start"
    } ],
-   "description": "Defuses the dumbest attempts at detecting devtools",
+   "description": "Defuses the dumbest attempts at detecting devtools.",
    "icons": {
       "128": "icon128.png",
       "32": "icon32.png"
    },
-   "browser_action": {
-       "default_icon": "icon.png"
-   },
+   "browser_action": {},
    "manifest_version": 2,
    "name": "anti anti devtools",
    "short_name": "AAD",
