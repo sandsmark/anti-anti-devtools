@@ -181,6 +181,10 @@ function setProp(obj, propertyName, val) {
 }
 
 
+/////////////////////
+// Disable the latest trick to detect devtools (store time, call 'debugger', check time elapsed)
+setProp(document, 'debugger', function() {});
+
 
 /////////////////////
 // Defuse a bunch of dumb APIs
