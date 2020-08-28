@@ -39,9 +39,19 @@ function randomChars(len) {
 }
 const generatedFpJsVid = randomChars(20);
 
+// I'm lazy, so sue me
+// Not sure what they store there
+chrome.webRequest.onBeforeRequest.addListener(
+    function() {
+        return {cancel: true};
+    },
+    { urls: ["*://api.sjpf.io/*"] },
+    ["blocking"]
+);
+
 chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
     var headers = details.requestHeaders;
-    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1); // lgtm [js/incomplete-url-substring-sanitization]
+    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1 || details.url.indexOf("sjpf.io/") != -1); // lgtm [js/incomplete-url-substring-sanitization]
     for(var i = 0, l = headers.length; i < l; ++i) {
         if( headers[i].name == 'User-Agent' ) {
             headers[i].value = userAgent;
@@ -82,8 +92,10 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
     if (details.tabId === -1) {
         console.log(details);
     }
+    if (details.url.indexOf("sjpf.io") != -1) {
+    }
 
-    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1); // lgtm [js/incomplete-url-substring-sanitization]
+    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") || details.url.indexOf("sjpf.io/") != -1); // lgtm [js/incomplete-url-substring-sanitization]
 
     var hadCookies = false;
     for(var i = 0, l = headers.length; i < l; ++i) {

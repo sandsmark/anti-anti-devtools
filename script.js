@@ -34,9 +34,11 @@ if (!enabled) {
 }
 
                                                                                                                                            /// we _want_ it to be trigger happy
-const isFingerprint = (window.location.hostname.indexOf("fingerprintjs.com") != -1 || window.location.hostname.indexOf("fpjs.io") != -1); // lgtm [js/incomplete-url-substring-sanitization]
+const isFingerprint = (window.location.hostname.indexOf("fingerprintjs.com") != -1 || window.location.hostname.indexOf("fpjs.io") != -1 || window.location.hostname.indexOf("sjpf.io") != -1); // lgtm [js/incomplete-url-substring-sanitization]
 if (isFingerprint) {
+    console.log("is fingerprinting");
     localStorage.removeItem('_vid');
+    sessionStorage.removeItem('_vid');
     delete_cookie('_vid');
 }
 
