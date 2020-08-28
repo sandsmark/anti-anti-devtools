@@ -180,12 +180,6 @@ function setProp(obj, propertyName, val) {
     setGet(obj, propertyName, () => val);
 }
 
-
-/////////////////////
-// Disable the latest trick to detect devtools (store time, call 'debugger', check time elapsed)
-setProp(document, 'debugger', function() {});
-
-
 /////////////////////
 // Defuse a bunch of dumb APIs
 Navigator.prototype.getBattery = () => {};
@@ -322,10 +316,22 @@ try {
     console.log("Failed to override keyboard locking: " + e);
 }
 
+
+/////////////////////
+// Disable the latest trick to detect devtools (store time, call 'debugger', check time elapsed)
+
+const debuggerRx = /\bdebugger\b/;
 const orig_addEventListener = window.addEventListener;
 setGetSet(window, 'addEventListener', () => function(type, listener, options) {
         if (type == 'beforeunload') {
             console.log('denied listener before unload', listener);
+            return;
+        }
+
+        // TODO: just strip out the debugger statement
+        if (debuggerRx.test(listener.toString())) {
+            console.log("Debugger in listener, refusing");
+            //console.log(listener); don't print it, it could sniff in its toString()
             return;
         }
         return orig_addEventListener(type, listener, options);
