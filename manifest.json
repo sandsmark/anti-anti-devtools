@@ -1,8 +1,5 @@
 {
    "author": "martin",
-   "background": {
-       "scripts": ["headers.js"]
-   },
    "permissions": [
     "webRequest",
     "webRequestBlocking",
