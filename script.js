@@ -340,6 +340,23 @@ setGetSet(window, 'addEventListener', () => function(type, listener, options) {
     },
     () => function() { console.warn("Tried to override addEventListener!"); }
 );
+const orig_setInterval = window.setInterval;
+setGetSet(window, 'setInterval', () => function(func, time) {
+        // TODO: just strip out the debugger statement
+        if (debuggerRx.test(func.toString())) {
+            console.log("Debugger in function, refusing");
+            //console.log(listener); don't print it, it could sniff in its toString()
+            return;
+        }
+        if (func.toString().indexOf('devtools') !== -1) { // lol just break the skiddies
+            console.log("Devtools in interval, refusing");
+            //console.log(listener); don't print it, it could sniff in its toString()
+            return;
+        }
+        return orig_setInterval(func, time);
+    },
+    () => function() { console.warn("Tried to override setInterval!"); }
+);
 
 //const orig_registerServiceWorker = navigator.serviceWorker.register;
 setGetSet(navigator.serviceWorker, 'register', () => function() {
