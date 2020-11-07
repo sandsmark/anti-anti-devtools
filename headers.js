@@ -95,7 +95,7 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
     if (details.url.indexOf("sjpf.io") != -1) {
     }
 
-    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") || details.url.indexOf("sjpf.io/") != -1); // lgtm [js/incomplete-url-substring-sanitization]
+    const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1 || details.url.indexOf("sjpf.io/") != -1); // lgtm [js/incomplete-url-substring-sanitization]
 
     var hadCookies = false;
     for(var i = 0, l = headers.length; i < l; ++i) {
