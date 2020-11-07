@@ -24,9 +24,27 @@ function delete_cookie( name ) {
 
 const fuckingsCookieName = 'Fuckings-To-The-Internet';
 
-const fuckingsSeed = getCookie(fuckingsCookieName);
-const enabled = fuckingsSeed !== 'nofuck';
+var fuckingsSeed = getCookie(fuckingsCookieName);
 delete_cookie(fuckingsCookieName);
+
+if (window.frameElement && window.frameElement.fuckingsSeed) {
+    fuckingsSeed = window.frameElement.fuckingsSeed;
+    delete window.frameElement.fuckingsSeed;
+}
+
+const enabled = fuckingsSeed !== 'nofuck';
+
+var observer = new MutationObserver(function(mutationList) {
+    for (var mutation of mutationList) {
+        for (var child of mutation.addedNodes) {
+            if (child.tagName !== "IFRAME") {
+                continue;
+            }
+            child['fuckingsSeed'] = fuckingsSeed;
+        }
+    }
+});
+observer.observe(document, {childList: true, subtree: true});
 
 if (!enabled) {
     console.warn('anti-devtools disabled in this tab');
