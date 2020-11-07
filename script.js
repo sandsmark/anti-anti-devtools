@@ -33,6 +33,9 @@ if (!enabled) {
     return;
 }
 
+// Silence the logging about failing to override stuff, a lot of stuff isn't
+// available without https and/or in e. g. about:blank
+const mightFail = window.location.protocol === "http:" || window.location.protocol === "about:";
                                                                                                                                            /// we _want_ it to be trigger happy
 const isFingerprint = (window.location.hostname.indexOf("fingerprintjs.com") != -1 || window.location.hostname.indexOf("fpjs.io") != -1 || window.location.hostname.indexOf("sjpf.io") != -1); // lgtm [js/incomplete-url-substring-sanitization]
 if (isFingerprint) {
@@ -157,7 +160,7 @@ function setGet(obj, propertyName, func) {
     try {
         Object.defineProperty(obj, propertyName, { get: func });
     } catch (exception) {
-        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
+        if (!mightFail) orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
     }
 }
 
@@ -166,7 +169,7 @@ function setSet(obj, propertyName, func) {
     try {
         Object.defineProperty(obj, propertyName, { set: func });
     } catch (exception) {
-        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
+        if (!mightFail) orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
     }
 }
 
@@ -174,7 +177,7 @@ function setGetSet(obj, propertyName, getFunc, setFunc) {
     try {
         Object.defineProperty(obj, propertyName, { set: setFunc, get: getFunc });
     } catch (exception) {
-        orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
+        if (!mightFail) orig_log("Failed to override getter (we probably got ran after the ublock helper): " + exception);
     }
 }
 
@@ -288,7 +291,7 @@ if (navigator.credentials) {
         });
     });
 } else {
-    orig_log("Credentials not available for site");
+    if (!mightFail) orig_log("Credentials not available for site");
 }
 
 setProp(navigator, 'hardwareConcurrency', 1);
@@ -315,7 +318,7 @@ try {
         });
     }
 } catch(e) {
-    console.log("Failed to override keyboard locking: " + e);
+    if (!mightFail) console.log("Failed to override keyboard locking: " + e);
 }
 
 
@@ -411,7 +414,7 @@ try {
         //}
     }
 } catch(e) {
-    console.log("Failed to override clipboard read: " + e);
+    if (!mightFail) console.log("Failed to override clipboard read: " + e);
 }
 
 try {
@@ -429,7 +432,7 @@ try {
         //}
     }
 } catch(e) {
-    console.log("Failed to override clipboard readtext: " + e);
+    if (!mightFail) console.log("Failed to override clipboard readtext: " + e);
 }
 
 try {
@@ -449,7 +452,7 @@ try {
         });
     }
 } catch(e) {
-    console.log("Failed to override clipboard write: " + e);
+    if (!mightFail) console.log("Failed to override clipboard write: " + e);
 }
 
 try {
@@ -469,7 +472,7 @@ try {
         });
     }
 } catch(e) {
-    console.log("Failed to override clipboard writetext: " + e);
+    if (!mightFail) console.log("Failed to override clipboard writetext: " + e);
 }
 
 const orig_execCommand = document.execCommand
@@ -554,51 +557,59 @@ function dumpBuf(result) {
     }
 }
 
-//const orig_random = Crypto.prototype.getRandomValues
-var notRandomArrayValue = 0
-Crypto.prototype.getRandomValues = function(arr) {
-    for (var i=0; i<arr.length; i++) {
-        arr[i] = notRandomArrayValue++
+function killCrypto() {
+    //const orig_random = Crypto.prototype.getRandomValues
+    var notRandomArrayValue = 0
+    Crypto.prototype.getRandomValues = function(arr) {
+        for (var i=0; i<arr.length; i++) {
+            arr[i] = notRandomArrayValue++
+        }
+        return arr;
     }
-    return arr;
+
+    const orig_decrypt = SubtleCrypto.prototype.decrypt
+    SubtleCrypto.prototype.decrypt = function(algorithm, key, data) {
+        var crypt = this
+        return new Promise(function(resolve, reject) {
+            orig_decrypt.call(crypt, algorithm, key, data).then(
+                function(result) {
+                    orig_log("decrypted")
+                    dumpBuf(result)
+                    resolve(result);
+                }
+            )
+        });
+    }
+    const orig_encrypt = SubtleCrypto.prototype.encrypt
+    SubtleCrypto.prototype.encrypt = function(algorithm, key, data) {
+        orig_log("encrypting")
+        dumpBuf(data)
+        var crypt = this
+        return new Promise(function(resolve, reject) {
+            orig_encrypt.call(crypt, algorithm, key, data).then(
+                function(result) {
+                    resolve(result);
+                }
+            )
+        });
+    }
+
+    SubtleCrypto.prototype.verify = function(algorithm, key, signature, data) {
+        console.log("Trying to verify some shit, alg " + algorithm.name + " hash name " + algorithm.hash.name);
+        return new Promise(function(resolve, reject) {
+            setTimeout(function() {
+                orig_log("Of course it's ok, you can trust the client")
+                resolve(true);
+            }, 1000);
+        });
+    }
+}
+try {
+    killCrypto();
+} catch(e) {
+    if (!mightFail) console.log("Failed to kill crypto: " + e)
 }
 
-const orig_decrypt = SubtleCrypto.prototype.decrypt
-SubtleCrypto.prototype.decrypt = function(algorithm, key, data) {
-    var crypt = this
-    return new Promise(function(resolve, reject) {
-        orig_decrypt.call(crypt, algorithm, key, data).then(
-            function(result) {
-                orig_log("decrypted")
-                dumpBuf(result)
-                resolve(result);
-            }
-        )
-    });
-}
-const orig_encrypt = SubtleCrypto.prototype.encrypt
-SubtleCrypto.prototype.encrypt = function(algorithm, key, data) {
-    orig_log("encrypting")
-    dumpBuf(data)
-    var crypt = this
-    return new Promise(function(resolve, reject) {
-        orig_encrypt.call(crypt, algorithm, key, data).then(
-            function(result) {
-                resolve(result);
-            }
-        )
-    });
-}
-
-SubtleCrypto.prototype.verify = function(algorithm, key, signature, data) {
-    console.log("Trying to verify some shit, alg " + algorithm.name + " hash name " + algorithm.hash.name);
-    return new Promise(function(resolve, reject) {
-        setTimeout(function() {
-            orig_log("Of course it's ok, you can trust the client")
-            resolve(true);
-        }, 1000);
-    });
-}
 
 /////////////////////
 // Checking outerWidth is what people do to check if the devtools pane is open, so fuck that up
@@ -863,7 +874,7 @@ navigator.storage.estimate = function() {
     });
 }
 } catch(e) {
-    console.log("Failed to override storage estimate: " + e)
+    if (!mightFail) console.log("Failed to override storage estimate: " + e)
 }
 
 const orig_webkitRequestFileSystem = window.webkitRequestFileSystem;
