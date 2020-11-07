@@ -103,31 +103,31 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
             continue
         }
 
-        hadCookies = true;
 
         var newHeader = ''
-        newHeader += `Fuckings-To-The-Internet=${enabled}; Max-Age=0;`
         const cookies = headers[i].value.split(';')
 
-        var alreadyHad = false;
+        var wasOurs = false;
         for (var cookie in cookies) {
             var cookieName = cookies[cookie].split('=')[0].trim()
             if (isFingerprint && cookieName == '_vid') {
-                newHeader += `_vid=` + generatedFpJsVid + `; Max-Age=0;`
+                headers[i].value = `_vid=` + generatedFpJsVid + `; Max-Age=0;`;
                 console.log("replaced vid, old " + cookies[cookie].split('=')[1].trim() + ", new " + generatedFpJsVid);
+                break;
             } else if (cookieName == fuckingsCookieName) {
-                continue;
+                headers[i].value = `Fuckings-To-The-Internet=${enabled}; Max-Age=0;`;
+                wasOurs = true;
+                hadCookies = true;
+                break;
             } else if (!isFingerprint) {
                 newHeader += cookies[cookie] + ';';
             }
         }
-
-        headers[i].value = newHeader;
     }
 
     if (!hadCookies) {
         headers.push({
-            name: "set-cookie",
+            name: "Set-Cookie",
             value: `Fuckings-To-The-Internet=${enabled};`
         });
     }
