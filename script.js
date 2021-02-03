@@ -884,7 +884,8 @@ navigator.storage.estimate = function() {
     return new Promise(function(resolve, reject) {
         setTimeout(function() {
             orig_storageEstimate.call(context).then(function(estimate) {
-                estimate.quota = hourlyRandom() * 2500000 + 120000000;
+                estimate.quota = hourlyRandom() * 25000000 + 604073351577;
+                estimate.usage = hourlyRandom() * 25000000;
                 console.log(estimate);
                 resolve(estimate);
             });
