@@ -97,8 +97,25 @@ chrome.webRequest.onHeadersReceived.addListener(function(details) {
 
     const isFingerprint = (details.url.indexOf("fingerprintjs.com/") != -1 || details.url.indexOf("fpjs.io/") != -1 || details.url.indexOf("sjpf.io/") != -1); // lgtm [js/incomplete-url-substring-sanitization]
 
+    var isFavicon = details.url.indexOf("favicon.ico") !== -1; // our content script should enforce this
+    for(var i = 0, l = headers.length; i < l; ++i) {
+        if (headers[i].name.toLowerCase() != 'content-type') {
+            continue;
+        }
+        if (headers[i].value.toLowerCase().indexOf('icon') !== -1) {
+            isFavicon = true;
+        }
+    }
+
     var hadCookies = false;
     for(var i = 0, l = headers.length; i < l; ++i) {
+        if (isFavicon && headers[i].name.toLowerCase() == 'location') {
+            console.warn("Might be trying to fingerprint via favicon");
+            console.log(details);
+            headers[i].value = "localhost";
+            continue;
+        }
+
         if (headers[i].name.toLowerCase() != 'set-cookie') {
             continue
         }

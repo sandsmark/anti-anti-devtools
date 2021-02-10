@@ -35,20 +35,12 @@ if (window.frameElement && window.frameElement.fuckingsSeed) {
 const enabled = fuckingsSeed !== 'nofuck';
 
 var observer = new MutationObserver(function(mutationList) {
-    // To neuter favicon fingerprinting, refuse to set anything but the default favicon
-    var toDelete = [];
     for (var mutation of mutationList) {
         for (var child of mutation.addedNodes) {
             if (child.tagName === "IFRAME") {
                 child['fuckingsSeed'] = fuckingsSeed;
             }
-            if (child.tagName === "LINK" && child.rel && child.rel.indexOf("icon") !== -1) {
-                toDelete.push(child);
-            }
         }
-    }
-    for (var child of toDelete) {
-        delete child;
     }
 });
 observer.observe(document, {childList: true, subtree: true});
@@ -98,6 +90,37 @@ const date = new Date();
 const hourlySeed = simpleHash((isFingerprint ? Math.random() : '') + date.toDateString() + date.getHours().toString() + Math.floor(date.getMinutes() / 6).toString() + fuckingsSeed);
 var hourlyRandom = LCG(hourlySeed);
 
+function randomChars(len) {
+    var chars = '';
+
+    while (chars.length < len) {
+        chars += Math.random().toString(36).substring(2);
+    }
+
+    // Remove unnecessary additional characters.
+    return chars.substring(0, len);
+}
+
+var observer = new MutationObserver(function(mutationList) {
+    // To neuter favicon fingerprinting, refuse to set anything but the default favicon
+    var toDelete = [];
+    for (var mutation of mutationList) {
+        for (var child of mutation.addedNodes) {
+            if (child.tagName === "LINK" && child.rel && child.rel.indexOf("icon") !== -1) {
+                if (!child['href'].toLowerCase().endsWith('/favicon.ico')) {
+                    child['href'] = randomChars(Math.random() * 10 + 5); // if they try to fuck, fuck back
+                } else {
+                    child['href'] = '/favicon.ico';
+                }
+                toDelete.push(child);
+            }
+        }
+    }
+    for (var child of toDelete) {
+        delete child;
+    }
+});
+observer.observe(document, {childList: true, subtree: true});
 
 /////////////////////
 // Avoid detection of devtools being open
