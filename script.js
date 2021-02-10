@@ -35,13 +35,20 @@ if (window.frameElement && window.frameElement.fuckingsSeed) {
 const enabled = fuckingsSeed !== 'nofuck';
 
 var observer = new MutationObserver(function(mutationList) {
+    // To neuter favicon fingerprinting, refuse to set anything but the default favicon
+    var toDelete = [];
     for (var mutation of mutationList) {
         for (var child of mutation.addedNodes) {
-            if (child.tagName !== "IFRAME") {
-                continue;
+            if (child.tagName === "IFRAME") {
+                child['fuckingsSeed'] = fuckingsSeed;
             }
-            child['fuckingsSeed'] = fuckingsSeed;
+            if (child.tagName === "LINK" && child.rel && child.rel.indexOf("icon") !== -1) {
+                toDelete.push(child);
+            }
         }
+    }
+    for (var child of toDelete) {
+        delete child;
     }
 });
 observer.observe(document, {childList: true, subtree: true});
