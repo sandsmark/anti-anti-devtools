@@ -58,8 +58,17 @@ const isFingerprint = (window.location.hostname.indexOf("fingerprintjs.com") != 
 if (isFingerprint) {
     console.log("is fingerprinting");
     localStorage.removeItem('_vid');
+    localStorage.removeItem('_vid_t');
+    localStorage.removeItem('_vid_i');
+    localStorage.removeItem('_iidt');
     sessionStorage.removeItem('_vid');
+    sessionStorage.removeItem('_vid_t');
+    sessionStorage.removeItem('_vid_i');
+    sessionStorage.removeItem('_iidt');
     delete_cookie('_vid');
+    delete_cookie('_vid_t');
+    delete_cookie('_vid_i');
+    delete_cookie('_iidt');
 }
 
 //////////////////////////////////////////////

@@ -37,7 +37,20 @@ function randomChars(len) {
     // Remove unnecessary additional characters.
     return chars.substring(0, len);
 }
+function garbageBase64(len) {
+    var chars = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+    while (chars.length < len) {
+        chars += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    // Remove unnecessary additional characters.
+    return chars;
+}
 const generatedFpJsVid = randomChars(20);
+const generatedFpJsVidT = garbageBase64(80);
+const generatedFpJsIIDT = garbageBase64(80);
 
 // I'm lazy, so sue me
 // Not sure what they store there
@@ -68,6 +81,12 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
                 if (isFingerprint && cookieName == '_vid') {
                     newHeader += `_vid=` + generatedFpJsVid + `; Max-Age=0;`
                     console.log("replaced vid, old " + cookies[cookie].split('=')[1].trim() + ", new " + generatedFpJsVid);
+                } else if (isFingerprint && cookieName == '_vid_t') {
+                    newHeader += `_vid_t=` + generatedFpJsVidT + `; Max-Age=0;`
+                    console.log("replaced vid_t, old " + cookies[cookie].split('=')[1].trim() + ", new " + generatedFpJsVidT);
+                } else if (isFingerprint && cookieName == '_iidt') {
+                    newHeader += `_iidt=` + generatedFpJsVidT + `; Max-Age=0;`
+                    console.log("replaced _iidt, old " + cookies[cookie].split('=')[1].trim() + ", new " + generatedFpJsIIDT);
                 } else if (cookieName == fuckingsCookieName) {
                     continue;
                 } else if (!isFingerprint) {
